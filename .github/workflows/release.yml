@@ -42,20 +42,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
-          releaseName: "shdw v__VERSION__"
+          releaseName: "Sclinic Video v__VERSION__"
           releaseBody: |
-            ## Download
+            **Based on shdw by d4niel-fr — https://github.com/d4niel-fr/shdw-video-editor**
 
-            | Platform | File |
+            Sclinic Video là bản đã chỉnh sửa (Việt hoá, đặt tên lớp timeline, đổi thương hiệu), không phải bản shdw chính thức. Mã nguồn theo GNU AGPL-3.0 kèm điều khoản ghi công (LICENSE, NOTICE).
+
+            ## Tải về
+
+            | Hệ điều hành | File |
             | --- | --- |
-            | **Windows 10/11** | `shdw_x.y.z_x64-setup.exe` (recommended) or `.msi` |
-            | **macOS 11+ (Apple Silicon & Intel)** | `shdw_x.y.z_universal.dmg` |
+            | **Windows 10/11** | `Sclinic.Video_x.y.z_x64-setup.exe` (khuyên dùng) hoặc `.msi` |
+            | **macOS 11+** | `Sclinic.Video_x.y.z_universal.dmg` |
 
-            **macOS:** the app is not notarized yet. After dragging it to Applications, run once:
-            `xattr -cr /Applications/shdw.app` — then open it normally.
+            **Windows:** bộ cài chưa ký số, nếu SmartScreen cảnh báo bấm More info → Run anyway.
+            **macOS:** app chưa notarize. Sau khi kéo vào Applications, chạy một lần:
+            `xattr -cr "/Applications/Sclinic Video.app"` rồi mở bình thường.
 
-            **You also need:** FFmpeg, a Chromium browser (Edge/Chrome — Edge ships with Windows), and the `claude` (Claude Code) and/or `codex` CLI, logged in.
-            See the [README](https://github.com/d4niel-fr/shdw-video-editor#-quick-start) for one-line installs.
+            **Cần thêm:** FFmpeg, trình duyệt Edge/Chrome, và `claude` (Claude Code) hoặc `codex` đã đăng nhập.
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
