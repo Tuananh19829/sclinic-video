@@ -40,11 +40,11 @@ export class MotionPage {
     this.codeHost = h("div", { class: "col", style: { flex: "1", minHeight: "0", gap: "0" } });
     this.strip = h("div", { class: "strip" });
     this.el = h("div", { class: "page page-motion" },
-      h("div", { class: "panel p-lib" }, h("header", {}, h("h3", {}, "Motion Library"), h("div", { class: "grow" }),
-        h("button", { class: "btn sm", onclick: () => this.newModule() }, I.plus(), "New")), this.lib),
+      h("div", { class: "panel p-lib" }, h("header", {}, h("h3", {}, "Thư viện chuyển động"), h("div", { class: "grow" }),
+        h("button", { class: "btn sm", onclick: () => this.newModule() }, I.plus(), "Mới")), this.lib),
       h("div", { class: "p-viewer", style: { display: "flex", minHeight: "0" } }),
       h("div", { class: "panel p-code" }, this.codeHost),
-      h("div", { class: "panel p-strip" }, h("header", {}, h("h3", {}, "Motion clips on timeline")), this.strip));
+      h("div", { class: "panel p-strip" }, h("header", {}, h("h3", {}, "Clip chuyển động trên timeline")), this.strip));
     store.on("open-motion", (id) => {
       const c = store.clip(id);
       if (c?.source.type === "motion" || c?.source.type === "html") { void this.open((c.source as any).module); store.select([c.id]); store.seek(c.start + 0.0001); }
@@ -69,17 +69,17 @@ export class MotionPage {
   private async renderLib() {
     clear(this.lib);
     const own = [...(await listHtml()), ...(await listModules("motion"))];
-    this.lib.appendChild(h("div", { class: "lib-sec" }, "Project modules"));
-    if (!own.length) this.lib.appendChild(h("div", { class: "faint", style: { padding: "4px 16px" } }, "None yet — create one or ask the agent."));
+    this.lib.appendChild(h("div", { class: "lib-sec" }, "Module của dự án"));
+    if (!own.length) this.lib.appendChild(h("div", { class: "faint", style: { padding: "4px 16px" } }, "Chưa có — hãy tạo mới hoặc nhờ agent."));
     for (const p of own) {
       const mod = p.endsWith(".js") ? getModule(p) : null;
       this.lib.appendChild(h("div", { class: "lib-item" + (p === this.file ? " sel" : ""), onclick: () => this.open(p) },
         h("div", { class: "sw", style: { background: p.endsWith(".html") ? "linear-gradient(135deg,#ff9f0a,#c43a6b)" : "linear-gradient(135deg,#8e44e8,#3b1066)" } }),
-        h("div", { class: "t" }, h("div", {}, mod?.name ?? p.split("/").pop()), h("small", {}, moduleError(p) ? "⚠ error" : p.endsWith(".html") ? "HTML · " + p : p))));
+        h("div", { class: "t" }, h("div", {}, mod?.name ?? p.split("/").pop()), h("small", {}, moduleError(p) ? "⚠ lỗi" : p.endsWith(".html") ? "HTML · " + p : p))));
     }
-    this.lib.appendChild(h("div", { class: "lib-sec" }, "Templates"));
+    this.lib.appendChild(h("div", { class: "lib-sec" }, "Mẫu"));
     for (const t of TEMPLATES) {
-      this.lib.appendChild(h("div", { class: "lib-item", title: "Double-click to add to timeline", onclick: async () => this.open(await materializeTemplate(t.id)), ondblclick: async () => act.addMotion(await materializeTemplate(t.id), t.name, t.duration) },
+      this.lib.appendChild(h("div", { class: "lib-item", title: "Nhấp đúp để thêm vào timeline", onclick: async () => this.open(await materializeTemplate(t.id)), ondblclick: async () => act.addMotion(await materializeTemplate(t.id), t.name, t.duration) },
         h("div", { class: "sw", style: { background: t.preview } }), h("div", { class: "t" }, h("div", {}, t.name), h("small", {}, t.category))));
     }
   }
@@ -87,7 +87,7 @@ export class MotionPage {
   private renderStrip() {
     clear(this.strip);
     const clips = store.project.clips.filter((c) => c.source.type === "motion" || c.source.type === "html").sort((a, b) => a.start - b.start);
-    if (!clips.length) { this.strip.appendChild(h("div", { class: "faint", style: { padding: "10px" } }, "No motion clips yet. Double-click a template to add one.")); return; }
+    if (!clips.length) { this.strip.appendChild(h("div", { class: "faint", style: { padding: "10px" } }, "Chưa có clip chuyển động. Nhấp đúp vào một mẫu để thêm.")); return; }
     for (const c of clips) {
       this.strip.appendChild(h("div", { class: "sc" + (store.selection.has(c.id) ? " sel" : ""), onclick: () => { store.select([c.id]); store.seek(c.start + Math.min(1, c.duration / 2)); void this.open((c.source as any).module); this.renderStrip(); } },
         h("div", { class: "im", style: { background: c.source.type === "html" ? "linear-gradient(135deg,#ff9f0a,#c43a6b)" : "linear-gradient(135deg,#8e44e8,#22113a)" } }),
@@ -96,7 +96,7 @@ export class MotionPage {
   }
 
   private async newModule() {
-    const name = await prompt("New motion composition (end with .js for canvas/GLSL)", "my-motion", "file name");
+    const name = await prompt("Bố cục chuyển động mới (đuôi .js cho canvas/GLSL)", "my-motion", "tên tệp");
     if (!name) return;
     const isJs = name.endsWith(".js");
     const rel = `motion/${name.replace(/\.(js|html)$/, "").replace(/[^\w-]+/g, "-")}.${isJs ? "js" : "html"}`;
@@ -119,8 +119,8 @@ export class MotionPage {
   private renderEditor(code?: string) {
     clear(this.codeHost);
     if (!this.file) {
-      this.codeHost.append(h("header", { style: { display: "flex", padding: "8px 12px", borderBottom: "1px solid var(--hair)" } }, h("h3", { style: { margin: 0, font: "600 12px var(--font-display)" } }, "Code")),
-        h("div", { class: "empty" }, h("div", {}, h("b", {}, "Motion graphics as code"), "Pick a module, or ask the agent:", h("br"), h("i", {}, "“make an Apple-style product reveal with my logo”"))));
+      this.codeHost.append(h("header", { style: { display: "flex", padding: "8px 12px", borderBottom: "1px solid var(--hair)" } }, h("h3", { style: { margin: 0, font: "600 12px var(--font-display)" } }, "Mã")),
+        h("div", { class: "empty" }, h("div", {}, h("b", {}, "Đồ hoạ chuyển động bằng mã"), "Chọn một module, hoặc nhờ agent:", h("br"), h("i", {}, "“làm đoạn giới thiệu sản phẩm kiểu Apple với logo của tôi”"))));
       return;
     }
     this.dirty = false;
@@ -128,8 +128,8 @@ export class MotionPage {
     this.ta.value = code ?? "";
     this.gutter = h("div", { class: "gutter" });
     this.err = h("div", { class: "errbar", style: { display: "none" } });
-    const save = h("button", { class: "btn sm primary", onclick: () => this.save() }, "Save  ⌃S");
-    const ask = h("input", { type: "text", placeholder: "Ask the agent to change this module…", style: { flex: "1" } }) as HTMLInputElement;
+    const save = h("button", { class: "btn sm primary", onclick: () => this.save() }, "Lưu  ⌃S");
+    const ask = h("input", { type: "text", placeholder: "Nhờ agent sửa module này…", style: { flex: "1" } }) as HTMLInputElement;
     ask.addEventListener("keydown", (e) => { if (e.key === "Enter" && ask.value.trim()) { store.emit("agent-prompt", `Edit the motion module ${this.file}: ${ask.value.trim()}. After editing, render a contact sheet with the control API to verify it looks great.`); ask.value = ""; } });
     const syncGutter = () => { this.gutter.textContent = this.ta.value.split("\n").map((_, i) => i + 1).join("\n"); this.gutter.scrollTop = this.ta.scrollTop; };
     this.ta.addEventListener("input", () => { this.dirty = true; syncGutter(); });
@@ -143,7 +143,7 @@ export class MotionPage {
     this.codeHost.append(
       h("header", { style: { display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderBottom: "1px solid var(--hair)" } },
         h("h3", { style: { margin: 0, font: "600 12px var(--font-display)" } }, this.file), h("div", { class: "grow" }),
-        h("button", { class: "btn sm", onclick: () => act.addMotion(this.file!, (this.file!.endsWith(".js") ? getModule(this.file!)?.name : null) ?? this.file!.split("/").pop()!, (this.file!.endsWith(".js") ? getModule(this.file!)?.duration : null) ?? 5) }, I.plus(), "Add to timeline"), save),
+        h("button", { class: "btn sm", onclick: () => act.addMotion(this.file!, (this.file!.endsWith(".js") ? getModule(this.file!)?.name : null) ?? this.file!.split("/").pop()!, (this.file!.endsWith(".js") ? getModule(this.file!)?.duration : null) ?? 5) }, I.plus(), "Thêm vào timeline"), save),
       h("div", { class: "code" }, this.gutter, this.ta), this.err,
       h("div", { class: "row", style: { padding: "8px 10px", borderTop: "1px solid var(--hair)" } }, I.spark(), ask));
     this.paintError();
@@ -153,7 +153,7 @@ export class MotionPage {
     if (!this.file) return;
     await fs.writeText(store.abs(this.file), this.ta.value);
     this.dirty = false;
-    store.emit("toast", "Saved — hot reloading");
+    store.emit("toast", "Đã lưu — đang tải lại");
   }
 
   private paintError() {

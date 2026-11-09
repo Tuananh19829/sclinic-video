@@ -14,10 +14,10 @@ export class AudioPage {
     this.mixer = h("div", { class: "mixer" });
     this.el = h("div", { class: "page page-audio" },
       h("div", { class: "panel" }, h("header", {}, h("h3", {}, "Timeline"), h("div", { class: "grow" }),
-        h("button", { class: "btn sm", onclick: () => act.addTrack("audio") }, I.plus(), "Audio track"),
-        h("button", { class: "btn sm", onclick: () => store.emit("agent-prompt", "Mix the audio: balance dialogue vs music (duck the music under speech with volume keyframes), add short fades at every audio cut, and keep peaks below -1 dBFS.") }, I.spark(), "AI mix")),
+        h("button", { class: "btn sm", onclick: () => act.addTrack("audio") }, I.plus(), "Track âm thanh"),
+        h("button", { class: "btn sm", onclick: () => store.emit("agent-prompt", "Mix the audio: balance dialogue vs music (duck the music under speech with volume keyframes), add short fades at every audio cut, and keep peaks below -1 dBFS.") }, I.spark(), "AI trộn âm")),
         h("div", { class: "tl-slot", style: { display: "flex", flex: "1", minHeight: "0" } })),
-      h("div", { class: "panel" }, h("header", {}, h("h3", {}, "Mixer")), this.mixer));
+      h("div", { class: "panel" }, h("header", {}, h("h3", {}, "Bàn trộn")), this.mixer));
     store.on("project", (w) => { if (this.el.isConnected && w !== "drag" && w !== "inspector") this.renderMixer(); });
   }
 
@@ -62,7 +62,7 @@ export class AudioPage {
     this.meters.push({ el: mm, peak: 0 });
     const mv = h("input", { type: "range", class: "vfader", min: 0, max: 2, step: 0.01, value: 1 }) as HTMLInputElement;
     mv.addEventListener("input", () => { if (playback.master) playback.master.gain.value = +mv.value; });
-    this.mixer.appendChild(h("div", { class: "strip-ch master" }, h("div", { class: "nm" }, "Master"), h("div", { class: "fader-wrap" }, mm, mv), h("div", { class: "faint", style: { fontSize: "10px" } }, "BUS 1")));
+    this.mixer.appendChild(h("div", { class: "strip-ch master" }, h("div", { class: "nm" }, "Tổng"), h("div", { class: "fader-wrap" }, mm, mv), h("div", { class: "faint", style: { fontSize: "10px" } }, "BUS 1")));
   }
 }
 const toDb = (v: number) => (v <= 0.0001 ? "-∞ dB" : `${(20 * Math.log10(v)).toFixed(1)} dB`);

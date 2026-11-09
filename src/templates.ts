@@ -6,13 +6,13 @@ export interface Template { id: string; name: string; category: string; duration
 
 export const TEMPLATES: Template[] = [
   {
-    id: "kinetic-title", name: "Kinetic Title", category: "Titles", duration: 4, preview: "linear-gradient(135deg,#111,#333)",
+    id: "kinetic-title", name: "Tiêu đề động", category: "Tiêu đề", duration: 4, preview: "linear-gradient(135deg,#111,#333)",
     code: `export default {
   name: "Kinetic Title",
   duration: 4,
   params: {
     text: { type: "text", default: "Think different." },
-    subtitle: { type: "text", default: "Introducing shdw" },
+    subtitle: { type: "text", default: "Giới thiệu Sclinic Video" },
     color: { type: "color", default: "#f5f5f7" },
     accent: { type: "color", default: "#0a84ff" },
     size: { type: "number", default: 168, min: 20, max: 500 },
@@ -50,7 +50,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "lower-third", name: "Glass Lower Third", category: "Lower Thirds", duration: 5, preview: "linear-gradient(90deg,#2a2a33 40%,#0a84ff)",
+    id: "lower-third", name: "Lower third kính mờ", category: "Lower third", duration: 5, preview: "linear-gradient(90deg,#2a2a33 40%,#0a84ff)",
     code: `export default {
   name: "Glass Lower Third",
   duration: 5,
@@ -92,7 +92,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "mesh-gradient", name: "Mesh Gradient (GPU)", category: "Backgrounds", duration: 10, preview: "radial-gradient(circle at 30% 30%,#5e5ce6,#0a0a20 60%),#ff375f",
+    id: "mesh-gradient", name: "Dải màu lưới (GPU)", category: "Nền", duration: 10, preview: "radial-gradient(circle at 30% 30%,#5e5ce6,#0a0a20 60%),#ff375f",
     code: `export default {
   name: "Mesh Gradient",
   duration: 10,
@@ -123,7 +123,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "counter", name: "Number Counter", category: "Data", duration: 3, preview: "linear-gradient(135deg,#0d2,#063)",
+    id: "counter", name: "Bộ đếm số", category: "Dữ liệu", duration: 3, preview: "linear-gradient(135deg,#0d2,#063)",
     code: `export default {
   name: "Number Counter",
   duration: 3,
@@ -151,7 +151,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "word-captions", name: "Karaoke Captions", category: "Captions", duration: 4, preview: "linear-gradient(90deg,#222,#ffd60a)",
+    id: "word-captions", name: "Phụ đề karaoke", category: "Phụ đề", duration: 4, preview: "linear-gradient(90deg,#222,#ffd60a)",
     code: `export default {
   name: "Karaoke Captions",
   duration: 4,
@@ -195,7 +195,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "bar-chart", name: "Animated Bar Chart", category: "Data", duration: 5, preview: "linear-gradient(0deg,#0a84ff 30%,#111 30%)",
+    id: "bar-chart", name: "Biểu đồ cột động", category: "Dữ liệu", duration: 5, preview: "linear-gradient(0deg,#0a84ff 30%,#111 30%)",
     code: `export default {
   name: "Animated Bar Chart",
   duration: 5,
@@ -234,12 +234,12 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "logo-reveal", name: "Logo Reveal", category: "Openers", duration: 4, preview: "radial-gradient(circle,#fff 10%,#000 40%)",
+    id: "logo-reveal", name: "Hiện logo", category: "Mở đầu", duration: 4, preview: "radial-gradient(circle,#fff 10%,#000 40%)",
     code: `export default {
   name: "Logo Reveal",
   duration: 4,
   params: {
-    text: { type: "text", default: "shdw" },
+    text: { type: "text", default: "Sclinic Video" },
     tagline: { type: "text", default: "edit at the speed of thought" },
     logo: { type: "text", default: "" },
     color: { type: "color", default: "#ffffff" },
@@ -272,7 +272,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "light-rays", name: "Light Rays (GPU)", category: "Backgrounds", duration: 8, preview: "conic-gradient(from 0deg,#000,#ffcc66,#000,#ffcc66,#000)",
+    id: "light-rays", name: "Tia sáng (GPU)", category: "Nền", duration: 8, preview: "conic-gradient(from 0deg,#000,#ffcc66,#000,#ffcc66,#000)",
     code: `export default {
   name: "Light Rays",
   duration: 8,
@@ -298,7 +298,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "particles", name: "Bokeh Particles", category: "Backgrounds", duration: 10, preview: "radial-gradient(circle at 20% 40%,#ffb34766 8%,transparent 9%),radial-gradient(circle at 70% 60%,#5e8bff66 10%,transparent 11%),#0b0b12",
+    id: "particles", name: "Hạt bokeh", category: "Nền", duration: 10, preview: "radial-gradient(circle at 20% 40%,#ffb34766 8%,transparent 9%),radial-gradient(circle at 70% 60%,#5e8bff66 10%,transparent 11%),#0b0b12",
     code: `export default {
   name: "Bokeh Particles",
   duration: 10,
@@ -330,7 +330,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "typewriter-code", name: "Code Typewriter", category: "Titles", duration: 6, preview: "linear-gradient(135deg,#1e1e1e,#2d2d2d)",
+    id: "typewriter-code", name: "Gõ mã từng chữ", category: "Tiêu đề", duration: 6, preview: "linear-gradient(135deg,#1e1e1e,#2d2d2d)",
     code: `export default {
   name: "Code Typewriter",
   duration: 6,
@@ -366,7 +366,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "callout", name: "Pointer Callout", category: "Annotations", duration: 4, preview: "linear-gradient(135deg,#222,#ff9f0a)",
+    id: "callout", name: "Chú thích mũi tên", category: "Chú thích", duration: 4, preview: "linear-gradient(135deg,#222,#ff9f0a)",
     code: `export default {
   name: "Pointer Callout",
   duration: 4,
@@ -404,7 +404,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "grid-bg", name: "Perspective Grid (GPU)", category: "Backgrounds", duration: 10, preview: "linear-gradient(180deg,#120024,#ff2bd6)",
+    id: "grid-bg", name: "Lưới phối cảnh (GPU)", category: "Nền", duration: 10, preview: "linear-gradient(180deg,#120024,#ff2bd6)",
     code: `export default {
   name: "Perspective Grid",
   duration: 10,
@@ -435,7 +435,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "countdown", name: "Countdown", category: "Openers", duration: 4, preview: "linear-gradient(135deg,#ff375f,#5e5ce6)",
+    id: "countdown", name: "Đếm ngược", category: "Mở đầu", duration: 4, preview: "linear-gradient(135deg,#ff375f,#5e5ce6)",
     code: `export default {
   name: "Countdown",
   duration: 4,
@@ -462,7 +462,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "film-frame", name: "Cinematic Letterbox Title", category: "Titles", duration: 5, preview: "linear-gradient(180deg,#000 18%,#333 18%,#333 82%,#000 82%)",
+    id: "film-frame", name: "Tiêu đề khung điện ảnh", category: "Tiêu đề", duration: 5, preview: "linear-gradient(180deg,#000 18%,#333 18%,#333 82%,#000 82%)",
     code: `export default {
   name: "Cinematic Letterbox Title",
   duration: 5,
@@ -486,7 +486,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "keynote-reveal", kind: "html", name: "Keynote Reveal (GSAP)", category: "HTML · GSAP", duration: 5, preview: "linear-gradient(100deg,#a78bfa,#5e8bff,#22d3ee)",
+    id: "keynote-reveal", kind: "html", name: "Hiện kiểu keynote (GSAP)", category: "HTML · GSAP", duration: 5, preview: "linear-gradient(100deg,#a78bfa,#5e8bff,#22d3ee)",
     code: `<!doctype html>
 <html><head><meta charset="utf-8">
 <script src="lib/gsap.min.js"></script>
@@ -527,7 +527,7 @@ export const TEMPLATES: Template[] = [
 `,
   },
   {
-    id: "stat-ring", kind: "html", name: "Stat Ring (SVG draw)", category: "HTML · GSAP", duration: 4, preview: "conic-gradient(#30d158 0 72%,#222 72%)",
+    id: "stat-ring", kind: "html", name: "Vòng số liệu (vẽ SVG)", category: "HTML · GSAP", duration: 4, preview: "conic-gradient(#30d158 0 72%,#222 72%)",
     code: `<!doctype html>
 <html><head><meta charset="utf-8">
 <script src="lib/gsap.min.js"></script>

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "shdw",
+  "productName": "Sclinic Video",
   "version": "1.0.0",
-  "identifier": "com.shdw.editor",
+  "identifier": "vn.sclinic.video",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "shdw",
+        "title": "Sclinic Video",
         "width": 1680,
         "height": 1020,
         "minWidth": 1180,
@@ -37,7 +37,9 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "nsis"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -45,15 +47,16 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "publisher": "d4niel-fr",
-    "copyright": "Copyright (C) 2026 d4niel-fr — AGPL-3.0 with attribution terms",
+    "publisher": "Sclinic",
+    "copyright": "Sclinic Video — modified from shdw (C) 2026 d4niel-fr. AGPL-3.0 with attribution terms (see NOTICE).",
     "category": "Video",
-    "shortDescription": "AI-native video editor with Claude Code / Codex built in",
-    "longDescription": "shdw is an open-source, DaVinci Resolve-style video editor where Claude Code or Codex edits your timeline, writes motion graphics in code, grades, captions and exports.",
-    "homepage": "https://github.com/d4niel-fr/shdw-video-editor",
+    "shortDescription": "Trình dựng video AI tiếng Việt (dựa trên shdw)",
+    "longDescription": "Sclinic Video is a modified version of shdw by d4niel-fr (https://github.com/d4niel-fr/shdw-video-editor): Vietnamese UI, named timeline tracks, Claude Code / Codex built in. Not an official shdw release.",
     "license": "AGPL-3.0-only",
     "macOS": {
       "minimumSystemVersion": "11.0"
-    }
-  }
+    },
+    "homepage": "https://github.com/Tuananh19829/sclinic-video"
+  },
+  "mainBinaryName": "Sclinic Video"
 }

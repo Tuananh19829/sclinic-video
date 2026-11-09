@@ -140,7 +140,7 @@ export function prompt(title: string, value = "", placeholder = ""): Promise<str
       setTimeout(() => { inp.focus(); inp.select(); }, 30);
       return h("div", { class: "col" }, h("h2", {}, title), inp,
         h("div", { class: "row", style: { justifyContent: "flex-end", marginTop: "8px" } },
-          h("button", { class: "btn", onclick: () => close() }, "Cancel"), h("button", { class: "btn primary", onclick: ok }, "OK")));
+          h("button", { class: "btn", onclick: () => close() }, "Huỷ"), h("button", { class: "btn primary", onclick: ok }, "OK")));
     }, () => { if (!done) res(null); });
   });
 }

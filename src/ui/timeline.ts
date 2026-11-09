@@ -1,5 +1,5 @@
 import { store } from "../store";
-import { Clip, Track, clipEnd, mediaOf, timecode, frameSnap, uid } from "../model";
+import { Clip, Track, clipEnd, mediaOf, timecode, frameSnap, uid, trackIcon } from "../model";
 import { h, I, clear, menu, MenuItem, drag } from "./dom";
 import { thumbUrl, waveforms } from "../media";
 import * as act from "../actions";
@@ -36,10 +36,10 @@ export class Timeline {
     const rulerWrap = h("div", { class: "tl-ruler" }, this.ruler);
     this.lane = h("div", { class: "tl-canvas" }, this.cv);
     const corner = h("div", { class: "tl-corner" },
-      h("button", { class: "btn icon sm ghost", title: "Add track", onclick: (e: MouseEvent) => menu(e.clientX, e.clientY, [
-        { label: "Add Video Track", action: () => act.addTrack("video") },
-        { label: "Add Audio Track", action: () => act.addTrack("audio") },
-        { label: "Add Subtitle Track", action: () => act.addTrack("subtitle") },
+      h("button", { class: "btn icon sm ghost", title: "Thêm track", onclick: (e: MouseEvent) => menu(e.clientX, e.clientY, [
+        { label: "Thêm track video", action: () => act.addTrack("video") },
+        { label: "Thêm track âm thanh", action: () => act.addTrack("audio") },
+        { label: "Thêm track phụ đề", action: () => act.addTrack("subtitle") },
       ]) }, I.plus()),
       h("span", { class: "timecode dim", id: "tl-tc" }, "00:00:00:00"));
     const grid = h("div", { class: "timeline" }, corner, rulerWrap, this.heads, this.lane);
@@ -63,29 +63,29 @@ export class Timeline {
       store.on("tool", () => b.classList.toggle("on", store.tool === id));
       return b;
     };
-    const snap = h("button", { class: "btn icon sm ghost" + (store.snapping ? " on" : ""), title: "Snapping (N)", onclick: () => { store.snapping = !store.snapping; snap.classList.toggle("on", store.snapping); } }, I.magnet());
+    const snap = h("button", { class: "btn icon sm ghost" + (store.snapping ? " on" : ""), title: "Bắt dính (N)", onclick: () => { store.snapping = !store.snapping; snap.classList.toggle("on", store.snapping); } }, I.magnet());
     const zoom = h("input", { type: "range", min: 2, max: 600, step: 1, value: store.zoom, style: { width: "120px" } });
     zoom.addEventListener("input", () => { store.zoom = +zoom.value; store.emit("zoom"); });
     store.on("zoom", () => { zoom.value = String(store.zoom); });
     return h("div", { class: "tl-toolbar" },
-      tool("select", I.cursor(), "Selection (A)"), tool("blade", I.blade(), "Blade (B)"), tool("trim", I.trim(), "Ripple trim (T)"), tool("hand", I.hand(), "Hand (H)"),
+      tool("select", I.cursor(), "Chọn (A)"), tool("blade", I.blade(), "Dao cắt (B)"), tool("trim", I.trim(), "Cắt tỉa Ripple (T)"), tool("hand", I.hand(), "Bàn tay (H)"),
       h("div", { class: "sep" }),
-      h("button", { class: "btn sm ghost", title: "Add video track", onclick: () => act.addTrack("video") }, "+V"),
-      h("button", { class: "btn sm ghost", title: "Add audio track", onclick: () => act.addTrack("audio") }, "+A"),
-      h("button", { class: "btn sm ghost", title: "Add subtitle track", onclick: () => act.addTrack("subtitle") }, "+S"),
+      h("button", { class: "btn sm ghost", title: "Thêm track video", onclick: () => act.addTrack("video") }, "+V"),
+      h("button", { class: "btn sm ghost", title: "Thêm track âm thanh", onclick: () => act.addTrack("audio") }, "+A"),
+      h("button", { class: "btn sm ghost", title: "Thêm track phụ đề", onclick: () => act.addTrack("subtitle") }, "+S"),
       h("div", { class: "sep" }), snap,
-      h("button", { class: "btn icon sm ghost", title: "Link / unlink (Ctrl+L)", onclick: () => act.toggleLink() }, I.link()),
-      h("button", { class: "btn icon sm ghost", title: "Split at playhead (Ctrl+B)", onclick: () => act.splitAt() }, I.split()),
-      h("button", { class: "btn icon sm ghost", title: "Add marker (M)", onclick: () => act.addMarker() }, I.marker()),
-      h("button", { class: "btn icon sm ghost", title: "Cross dissolve at playhead (Ctrl+T)", onclick: () => act.transitionAtPlayhead() }, I.wand()),
+      h("button", { class: "btn icon sm ghost", title: "Liên kết / bỏ liên kết (Ctrl+L)", onclick: () => act.toggleLink() }, I.link()),
+      h("button", { class: "btn icon sm ghost", title: "Tách tại đầu phát (Ctrl+B)", onclick: () => act.splitAt() }, I.split()),
+      h("button", { class: "btn icon sm ghost", title: "Thêm điểm đánh dấu (M)", onclick: () => act.addMarker() }, I.marker()),
+      h("button", { class: "btn icon sm ghost", title: "Hoà tan chéo tại đầu phát (Ctrl+T)", onclick: () => act.transitionAtPlayhead() }, I.wand()),
       h("div", { class: "sep" }),
-      h("button", { class: "btn icon sm ghost", title: "Undo", onclick: () => store.undo() }, I.undo()),
-      h("button", { class: "btn icon sm ghost", title: "Redo", onclick: () => store.redo() }, I.redo()),
+      h("button", { class: "btn icon sm ghost", title: "Hoàn tác", onclick: () => store.undo() }, I.undo()),
+      h("button", { class: "btn icon sm ghost", title: "Làm lại", onclick: () => store.redo() }, I.redo()),
       h("div", { class: "grow" }),
-      h("button", { class: "btn icon sm ghost", title: "Zoom out", onclick: () => { store.zoom = Math.max(2, store.zoom / 1.4); store.emit("zoom"); } }, I.zoomOut()),
+      h("button", { class: "btn icon sm ghost", title: "Thu nhỏ", onclick: () => { store.zoom = Math.max(2, store.zoom / 1.4); store.emit("zoom"); } }, I.zoomOut()),
       zoom,
-      h("button", { class: "btn icon sm ghost", title: "Zoom in", onclick: () => { store.zoom = Math.min(600, store.zoom * 1.4); store.emit("zoom"); } }, I.zoomIn()),
-      h("button", { class: "btn icon sm ghost", title: "Zoom to fit (Shift+Z)", onclick: () => this.fit() }, I.fit()));
+      h("button", { class: "btn icon sm ghost", title: "Phóng to", onclick: () => { store.zoom = Math.min(600, store.zoom * 1.4); store.emit("zoom"); } }, I.zoomIn()),
+      h("button", { class: "btn icon sm ghost", title: "Vừa khung (Shift+Z)", onclick: () => this.fit() }, I.fit()));
   }
 
   fit() {
@@ -138,24 +138,24 @@ export class Timeline {
       const toggle = (key: "locked" | "hidden" | "muted" | "solo") => () => { store.mutate(key, () => { (t as any)[key] = !(t as any)[key]; }); playback.refreshBuses(); };
       const head = h("div", { class: "tl-head", style: { top: r.y - this.scrollY + "px", height: r.h + "px" } },
         h("div", { class: "tag", style: { background: t.kind === "video" ? "var(--clip-video)" : t.kind === "audio" ? "var(--clip-audio)" : "var(--clip-sub)" } }),
-        h("div", { class: "nm", ondblclick: async () => { const { prompt } = await import("./dom"); const n = await prompt("Track name", t.name); if (n) store.mutate("rename track", () => { t.name = n; }); } }, t.id, t.name !== t.id ? h("small", {}, t.name) : null),
-        t.kind !== "audio" ? h("button", { class: t.hidden ? "on" : "", title: "Show/hide", onclick: toggle("hidden") }, t.hidden ? I.eyeOff() : I.eye()) : null,
-        t.kind === "audio" ? h("button", { class: "mute" + (t.muted ? " on" : ""), title: "Mute", onclick: toggle("muted") }, "M") : null,
+        h("div", { class: "nm", ondblclick: async () => { const { prompt } = await import("./dom"); const n = await prompt("Tên track", t.name); if (n) store.mutate("rename track", () => { t.name = n; }); }, title: `${t.name} (${t.id}) · nhấp đúp để đổi tên` }, h("span", { class: "ico" }, trackIcon(t)), t.name),
+        t.kind !== "audio" ? h("button", { class: t.hidden ? "on" : "", title: "Hiện/ẩn", onclick: toggle("hidden") }, t.hidden ? I.eyeOff() : I.eye()) : null,
+        t.kind === "audio" ? h("button", { class: "mute" + (t.muted ? " on" : ""), title: "Tắt tiếng", onclick: toggle("muted") }, "M") : null,
         h("button", { class: "solo" + (t.solo ? " on" : ""), title: "Solo", onclick: toggle("solo") }, "S"),
-        h("button", { class: t.locked ? "on" : "", title: "Lock", onclick: toggle("locked") }, t.locked ? I.lock() : I.unlock()));
+        h("button", { class: t.locked ? "on" : "", title: "Khoá", onclick: toggle("locked") }, t.locked ? I.lock() : I.unlock()));
       head.querySelectorAll("svg").forEach((s) => { (s as any).style.width = "13px"; (s as any).style.height = "13px"; });
       head.addEventListener("contextmenu", (e) => { e.preventDefault(); menu(e.clientX, e.clientY, [
-        { label: "Rename…", action: () => head.querySelector<HTMLElement>(".nm")!.dispatchEvent(new MouseEvent("dblclick")) },
-        { label: "Insert track above", action: () => act.addTrack(t.kind, t.id, true) },
-        { label: "Insert track below", action: () => act.addTrack(t.kind, t.id, false) },
-        { label: "Move track up", action: () => act.moveTrack(t.id, t.kind === "audio" ? -1 : 1) },
-        { label: "Move track down", action: () => act.moveTrack(t.id, t.kind === "audio" ? 1 : -1) },
-        { label: "Delete all empty tracks", action: () => act.removeEmptyTracks() },
-        { label: "Close gaps", action: () => act.closeGaps(t.id) },
-        { label: "Taller", action: () => store.mutate("track height", () => { t.height = (t.height ?? r.h) + 16; }) },
-        { label: "Shorter", action: () => store.mutate("track height", () => { t.height = Math.max(24, (t.height ?? r.h) - 16); }) },
+        { label: "Đổi tên…", action: () => head.querySelector<HTMLElement>(".nm")!.dispatchEvent(new MouseEvent("dblclick")) },
+        { label: "Chèn track phía trên", action: () => act.addTrack(t.kind, t.id, true) },
+        { label: "Chèn track phía dưới", action: () => act.addTrack(t.kind, t.id, false) },
+        { label: "Chuyển track lên", action: () => act.moveTrack(t.id, t.kind === "audio" ? -1 : 1) },
+        { label: "Chuyển track xuống", action: () => act.moveTrack(t.id, t.kind === "audio" ? 1 : -1) },
+        { label: "Xoá mọi track trống", action: () => act.removeEmptyTracks() },
+        { label: "Xoá khoảng trống", action: () => act.closeGaps(t.id) },
+        { label: "Cao hơn", action: () => store.mutate("track height", () => { t.height = (t.height ?? r.h) + 16; }) },
+        { label: "Thấp hơn", action: () => store.mutate("track height", () => { t.height = Math.max(24, (t.height ?? r.h) - 16); }) },
         { sep: true },
-        { label: "Delete track", action: () => act.removeTrack(t.id) },
+        { label: "Xoá track", action: () => act.removeTrack(t.id) },
       ]); });
       this.heads.appendChild(head);
     }
@@ -372,11 +372,11 @@ export class Timeline {
       const t = this.t(e.clientX - wrap.getBoundingClientRect().left);
       const near = store.project.markers.find((m) => Math.abs(m.t - t) * store.zoom < 6);
       menu(e.clientX, e.clientY, [
-        { label: "Add marker here", action: () => act.addMarker(frameSnap(t, store.fps)) },
-        { label: "Set In point", key: "I", action: () => { store.inPoint = frameSnap(t, store.fps); store.emit("time"); } },
-        { label: "Set Out point", key: "O", action: () => { store.outPoint = frameSnap(t, store.fps); store.emit("time"); } },
-        { label: "Clear In/Out", key: "Alt+X", action: () => { store.inPoint = store.outPoint = null; store.emit("time"); } },
-        ...(near ? [{ sep: true }, { label: `Delete marker "${near.name}"`, action: () => store.mutate("del marker", (p) => { p.markers = p.markers.filter((m) => m !== near); }) }] as MenuItem[] : []),
+        { label: "Thêm điểm đánh dấu tại đây", action: () => act.addMarker(frameSnap(t, store.fps)) },
+        { label: "Đặt điểm vào", key: "I", action: () => { store.inPoint = frameSnap(t, store.fps); store.emit("time"); } },
+        { label: "Đặt điểm ra", key: "O", action: () => { store.outPoint = frameSnap(t, store.fps); store.emit("time"); } },
+        { label: "Xoá điểm vào/ra", key: "Alt+X", action: () => { store.inPoint = store.outPoint = null; store.emit("time"); } },
+        ...(near ? [{ sep: true }, { label: `Xoá điểm đánh dấu "${near.name}"`, action: () => store.mutate("del marker", (p) => { p.markers = p.markers.filter((m) => m !== near); }) }] as MenuItem[] : []),
       ]);
     });
   }
@@ -472,13 +472,13 @@ export class Timeline {
       const hit = this.clipAt(e.clientX - rect.left, e.clientY - rect.top);
       if (!hit.clip) {
         menu(e.clientX, e.clientY, [
-          { label: "Paste", key: "Ctrl+V", action: () => act.paste(frameSnap(this.t(e.clientX - rect.left), store.fps)) },
-          { label: "Add Text", action: () => act.addText() },
-          { label: "Add Solid Color", action: () => act.addSolid() },
-          { label: "Add Gradient", action: () => act.addGradient() },
-          { label: "Add Adjustment Layer", action: () => act.addAdjustment() },
+          { label: "Dán", key: "Ctrl+V", action: () => act.paste(frameSnap(this.t(e.clientX - rect.left), store.fps)) },
+          { label: "Thêm chữ", action: () => act.addText() },
+          { label: "Thêm màu đơn sắc", action: () => act.addSolid() },
+          { label: "Thêm dải màu", action: () => act.addGradient() },
+          { label: "Thêm lớp điều chỉnh", action: () => act.addAdjustment() },
           { sep: true },
-          { label: "Close all gaps", action: () => act.closeGaps() },
+          { label: "Xoá mọi khoảng trống", action: () => act.closeGaps() },
         ]);
         return;
       }
@@ -486,39 +486,39 @@ export class Timeline {
       if (!store.selection.has(c.id)) store.select([c.id]);
       const m = mediaOf(store.project, c);
       const items: MenuItem[] = [
-        { label: "Split at playhead", key: "Ctrl+B", action: () => act.splitAt() },
-        { label: "Cut", key: "Ctrl+X", action: () => act.cutSelection() },
-        { label: "Copy", key: "Ctrl+C", action: () => act.copySelection() },
-        { label: "Duplicate", key: "Ctrl+D", action: () => act.duplicateSelection() },
-        { label: "Delete", key: "Del", action: () => act.deleteSelection() },
-        { label: "Ripple delete", key: "Shift+Del", action: () => act.deleteSelection(true) },
+        { label: "Tách tại đầu phát", key: "Ctrl+B", action: () => act.splitAt() },
+        { label: "Cắt", key: "Ctrl+X", action: () => act.cutSelection() },
+        { label: "Sao chép", key: "Ctrl+C", action: () => act.copySelection() },
+        { label: "Nhân bản", key: "Ctrl+D", action: () => act.duplicateSelection() },
+        { label: "Xoá", key: "Del", action: () => act.deleteSelection() },
+        { label: "Xoá Ripple", key: "Shift+Del", action: () => act.deleteSelection(true) },
         { sep: true },
-        { label: c.enabled === false ? "Enable clip" : "Disable clip", key: "D", action: () => act.toggleEnabled() },
-        { label: c.link ? "Unlink" : "Link", key: "Ctrl+L", action: () => act.toggleLink() },
-        { header: "Speed" },
+        { label: c.enabled === false ? "Bật clip" : "Tắt clip", key: "D", action: () => act.toggleEnabled() },
+        { label: c.link ? "Bỏ liên kết" : "Liên kết", key: "Ctrl+L", action: () => act.toggleLink() },
+        { header: "Tốc độ" },
         ...[0.25, 0.5, 1, 1.5, 2, 4].map((s) => ({ label: `${s * 100}%`, action: () => setSpeed(c, s) })),
-        { header: "Transition in" },
+        { header: "Chuyển cảnh vào" },
         ...TRANSITION_NAMES.slice(0, 10).map((n) => ({ label: TRANSITIONS[n].name, action: () => act.setTransition(c.id, n) })),
-        { label: "More transitions… (Effects library)", action: () => store.emit("show-library", "transitions") },
-        ...(c.transition ? [{ label: "Remove transition", action: () => act.setTransition(c.id, "") }] : []),
+        { label: "Thêm chuyển cảnh… (Thư viện hiệu ứng)", action: () => store.emit("show-library", "transitions") },
+        ...(c.transition ? [{ label: "Gỡ chuyển cảnh", action: () => act.setTransition(c.id, "") }] : []),
         { sep: true },
         ...(m && (m.kind === "video" || m.kind === "audio") ? [
-          { label: "Auto captions (Whisper)", action: () => act.captionsFor(m.id).then((n) => store.emit("toast", `${n} captions added`)).catch((err) => store.error("captions", String(err))) },
+          { label: "Phụ đề tự động (Whisper)", action: () => act.captionsFor(m.id).then((n) => store.emit("toast", `Đã thêm ${n} phụ đề`)).catch((err) => store.error("captions", String(err))) },
         ] : []),
         ...(m && m.kind !== "image" ? [
-          { header: "Processing" },
-          ...(m.kind === "video" ? [{ label: "Scene cut detection → split", action: () => run(() => sceneDetect(c)) }] : []),
+          { header: "Xử lý" },
+          ...(m.kind === "video" ? [{ label: "Nhận diện chuyển cảnh → tách", action: () => run(() => sceneDetect(c)) }] : []),
           ...(m.kind === "audio" || m.hasAudio ? [
-            { label: "Remove silences (ripple)", action: () => run(() => removeSilence(c)) },
-            { label: "Normalize loudness (-14 LUFS)", action: () => run(() => normalizeLoudness(c)) },
-            { label: "Detect beats → markers", action: () => run(async () => detectBeats(c)) },
+            { label: "Xoá đoạn im lặng (ripple)", action: () => run(() => removeSilence(c)) },
+            { label: "Chuẩn hoá âm lượng (-14 LUFS)", action: () => run(() => normalizeLoudness(c)) },
+            { label: "Dò nhịp → điểm đánh dấu", action: () => run(async () => detectBeats(c)) },
           ] : []),
           ...(Object.keys(PROCS) as (keyof typeof PROCS)[]).filter((k) => m.kind === "video" || ["audioDenoise", "voiceEnhance", "reverse"].includes(k))
             .map((k) => ({ label: PROCS[k], action: () => run(() => processClip(c, k)) })),
-          ...(m.kind === "video" ? [{ label: c.freeze ? "Unfreeze frame" : "Freeze frame", action: () => toggleFreeze(c) }] : []),
+          ...(m.kind === "video" ? [{ label: c.freeze ? "Bỏ đóng băng khung" : "Đóng băng khung", action: () => toggleFreeze(c) }] : []),
         ] as MenuItem[] : []),
         { sep: true },
-        { label: "✦ Ask agent about this clip…", action: () => this.onAskAgent(`About clip ${c.id} ("${c.name ?? c.source.type}"): `) },
+        { label: "✦ Hỏi agent về clip này…", action: () => this.onAskAgent(`About clip ${c.id} ("${c.name ?? c.source.type}"): `) },
       ];
       menu(e.clientX, e.clientY, items);
     });

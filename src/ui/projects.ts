@@ -161,11 +161,11 @@ export function glassFolder(o: FolderOpts): HTMLElement {
   const front = h("div", { class: "gf-front", style: { clipPath: `path('${FRONT_PATH}')` } },
     h("div", { class: "gf-tint" }), h("div", { class: "gf-spec" }),
     svg(`0 0 ${W} ${FRONT_H}`, "gf-rim gf-front-rim", FRONT_PATH),
-    h("button", { class: "gf-hit", title: "Open project", onclick: () => o.onOpen() }),
+    h("button", { class: "gf-hit", title: "Mở dự án", onclick: () => o.onOpen() }),
     h("div", { class: "gf-label" }, h("span", { class: "gf-title" }, o.label), h("span", { class: "gf-meta" }, o.meta)));
 
   const menu = h("div", { class: "gf-menu" }, ...o.menu.map((m) => h("button", { class: "gf-menu-item" + (m.danger ? " danger" : ""), onclick: (e: Event) => { e.stopPropagation(); menu.classList.remove("open"); m.run(); } }, m.label)));
-  const more = h("button", { class: "gf-key", title: "More", onclick: (e: Event) => { e.stopPropagation(); menu.classList.toggle("open"); } },
+  const more = h("button", { class: "gf-key", title: "Thêm", onclick: (e: Event) => { e.stopPropagation(); menu.classList.toggle("open"); } },
     svg("0 0 30 12", "gf-glyph", "M5 6h.01M15 6h.01M25 6h.01"));
   document.addEventListener("pointerdown", (e) => { if (!menu.contains(e.target as Node) && !more.contains(e.target as Node)) menu.classList.remove("open"); });
 
@@ -209,7 +209,7 @@ export function confirmDialog(title: string, body: string, action: string): Prom
     let done = false;
     modal((close) => h("div", { class: "col" }, h("h2", {}, title), h("p", { class: "muted", style: { margin: "0", lineHeight: "1.5" } }, body),
       h("div", { class: "row", style: { justifyContent: "flex-end", marginTop: "10px" } },
-        h("button", { class: "btn", onclick: () => close() }, "Cancel"),
+        h("button", { class: "btn", onclick: () => close() }, "Hủy"),
         h("button", { class: "btn danger", onclick: () => { done = true; res(true); close(); } }, action))),
       () => { if (!done) res(false); });
   });

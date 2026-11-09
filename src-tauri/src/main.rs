@@ -43,6 +43,7 @@ fn main() {
             project::remove_path,
             project::exists,
             project::reveal,
+            project::open_url,
             project::env_info,
             project::startup_project,
             media::probe,

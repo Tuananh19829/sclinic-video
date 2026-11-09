@@ -23,6 +23,7 @@ import { DeliverPage } from "./pages/deliver";
 import { importFiles, prepareMedia } from "./media";
 import { loadProjectFonts } from "./fonts";
 import { startControl } from "./control";
+import { APP_NAME, APP_VERSION, SOURCE_URL, UPSTREAM_URL } from "./brand";
 import * as act from "./actions";
 import { htmlFrames, installLibs } from "./engine/html";
 import { liveHtml } from "./engine/live";
@@ -80,12 +81,12 @@ split.addEventListener("pointerdown", (e) => {
 });
 
 const pages: Record<string, { el: HTMLElement; mount: () => void; label: string; icon: () => SVGElement }> = {
-  media: { el: mediaPage.el, mount: () => mediaPage.render(), label: "Media", icon: I.media },
-  edit: { el: editPage, mount: () => { const slot = editPage.querySelector(".p-viewer-slot")!; if (viewer.el.parentElement !== slot) slot.appendChild(viewer.el); viewer.el.style.flex = "1"; viewer.mount(); timeline.invalidate(); }, label: "Edit", icon: I.edit },
-  motion: { el: motionPage.el, mount: () => motionPage.mount(), label: "Motion", icon: I.motion },
-  color: { el: colorPage.el, mount: () => colorPage.mount(), label: "Color", icon: I.color },
-  audio: { el: audioPage.el, mount: () => audioPage.mount(), label: "Fairlight", icon: I.audio },
-  deliver: { el: deliverPage.el, mount: () => deliverPage.mount(), label: "Deliver", icon: I.deliver },
+  media: { el: mediaPage.el, mount: () => mediaPage.render(), label: "Tư liệu", icon: I.media },
+  edit: { el: editPage, mount: () => { const slot = editPage.querySelector(".p-viewer-slot")!; if (viewer.el.parentElement !== slot) slot.appendChild(viewer.el); viewer.el.style.flex = "1"; viewer.mount(); timeline.invalidate(); }, label: "Dựng", icon: I.edit },
+  motion: { el: motionPage.el, mount: () => motionPage.mount(), label: "Chuyển động", icon: I.motion },
+  color: { el: colorPage.el, mount: () => colorPage.mount(), label: "Màu", icon: I.color },
+  audio: { el: audioPage.el, mount: () => audioPage.mount(), label: "Âm thanh", icon: I.audio },
+  deliver: { el: deliverPage.el, mount: () => deliverPage.mount(), label: "Xuất", icon: I.deliver },
 };
 
 const pagesHost = h("div", { id: "pages" }, ...Object.values(pages).map((p) => p.el));
@@ -115,23 +116,24 @@ store.on("agent-busy", (b) => (agentDot.className = "dot " + (b ? "busy" : "ok")
 const projName = h("span", { class: "proj" }, "");
 store.on("project", () => { projName.textContent = store.project.name; });
 const saved = h("span", { class: "faint" }, "");
-store.on("saved", () => { saved.textContent = "Saved"; setTimeout(() => (saved.textContent = ""), 1200); });
+store.on("saved", () => { saved.textContent = "Đã lưu"; setTimeout(() => (saved.textContent = ""), 1200); });
 
 const titlebar = h("header", { class: "titlebar", "data-tauri-drag-region": true },
   h("div", { class: "lights" },
-    h("button", { class: "close", title: "Close", onclick: () => win.close() }),
-    h("button", { class: "min", title: "Minimize", onclick: () => win.minimize() }),
-    h("button", { class: "max", title: "Zoom", onclick: () => win.toggleMaximize() })),
-  h("div", { class: "brand", "data-tauri-drag-region": true }, h("div", { class: "logo" }), "shdw"),
+    h("button", { class: "close", title: "Đóng", onclick: () => win.close() }),
+    h("button", { class: "min", title: "Thu nhỏ", onclick: () => win.minimize() }),
+    h("button", { class: "max", title: "Phóng to", onclick: () => win.toggleMaximize() })),
+  h("div", { class: "brand", "data-tauri-drag-region": true, title: "Giới thiệu", style: { cursor: "pointer" }, onclick: () => showAbout() }, h("div", { class: "logo" }), APP_NAME),
   projName,
   h("div", { class: "spacer", "data-tauri-drag-region": true, ondblclick: () => win.toggleMaximize() }),
   h("div", { class: "status" }, saved, errBadge,
-    h("button", { class: "btn sm ghost", title: "Open / new project", onclick: () => showWelcome() }, I.folder(), "Projects")));
+    h("button", { class: "btn sm ghost", title: "Giới thiệu & giấy phép", onclick: () => showAbout() }, "Giới thiệu"),
+    h("button", { class: "btn sm ghost", title: "Mở / tạo dự án", onclick: () => showWelcome() }, I.folder(), "Dự án")));
 
 const agentToggle = h("button", { class: "btn sm", title: "Agent (Ctrl+K)", onclick: () => { agent.toggle(); agentToggle.classList.toggle("on", !agent.el.classList.contains("hidden")); } }, agentDot, I.spark(), "Agent");
 agentToggle.classList.add("on");
 const pagebar = h("footer", { class: "pagebar" },
-  h("div", { class: "left" }, h("button", { class: "btn icon sm ghost", title: "Undo (Ctrl+Z)", onclick: () => store.undo() }, I.undo()), h("button", { class: "btn icon sm ghost", title: "Redo (Ctrl+Shift+Z)", onclick: () => store.redo() }, I.redo())),
+  h("div", { class: "left" }, h("button", { class: "btn icon sm ghost", title: "Hoàn tác (Ctrl+Z)", onclick: () => store.undo() }, I.undo()), h("button", { class: "btn icon sm ghost", title: "Làm lại (Ctrl+Shift+Z)", onclick: () => store.redo() }, I.redo())),
   seg,
   h("div", { class: "right" }, agentToggle));
 
@@ -143,15 +145,33 @@ setPage("edit");
 store.on("toast", (t) => toast(t));
 store.on("set-page", (n) => { if (pages[n]) setPage(n); });
 
+function showAbout() {
+  const link = (url: string) => h("a", { href: "#", style: { color: "var(--blue, #5e8bff)" }, onclick: (e: Event) => { e.preventDefault(); void openUrl(url); } }, url);
+  modal((close) => h("div", { class: "col", style: { maxWidth: "520px", gap: "10px" } },
+    h("h2", {}, `${APP_NAME} ${APP_VERSION}`),
+    h("p", {}, "Trình dựng video có AI (Claude Code / Codex) tích hợp, giao diện tiếng Việt. Phát hành miễn phí."),
+    h("p", { style: { fontWeight: "600" } }, "Based on shdw by d4niel-fr — ", link(UPSTREAM_URL)),
+    h("p", { class: "muted" }, `${APP_NAME} là bản đã chỉnh sửa (Việt hoá, đặt tên lớp timeline, đổi thương hiệu) từ shdw. Đây không phải bản shdw chính thức và không được tác giả gốc xác nhận.`),
+    h("p", { class: "muted" }, "Giấy phép: GNU AGPL-3.0 kèm điều khoản ghi công (xem LICENSE và NOTICE). Bạn có quyền dùng, chia sẻ và sửa đổi; khi phân phối phải kèm mã nguồn theo cùng giấy phép."),
+    h("p", { class: "muted" }, "Mã nguồn bản này: ", SOURCE_URL ? link(SOURCE_URL) : "đang cập nhật"),
+    h("p", { class: "faint", style: { fontSize: "11px" } }, "Thành phần bên thứ ba giữ giấy phép riêng: Tauri, GSAP (giấy phép Standard no-charge của GSAP), FFmpeg, Claude Code, Codex."),
+    h("div", { class: "row", style: { justifyContent: "flex-end" } }, h("button", { class: "btn primary", onclick: () => close() }, "Đóng"))));
+}
+
+async function openUrl(url: string) {
+  try { await invoke("open_url", { url }); }
+  catch { try { await navigator.clipboard.writeText(url); toast("Đã chép liên kết: " + url); } catch { toast(url); } }
+}
+
 function showErrors() {
   modal((close) => h("div", { class: "col" },
-    h("h2", {}, "Problems"),
-    h("p", {}, "Compile/runtime errors from motion modules, shaders and media. The agent sees these too."),
+    h("h2", {}, "Sự cố"),
+    h("p", {}, "Lỗi biên dịch/chạy từ module chuyển động, shader và media. Agent cũng thấy các lỗi này."),
     h("div", { style: { maxHeight: "50vh", overflow: "auto", font: "11.5px/1.5 var(--mono)", userSelect: "text" } },
       ...store.errors.slice().reverse().map((e) => h("div", { style: { padding: "6px 0", borderBottom: "1px solid var(--hair)" } }, h("b", {}, e.source), h("div", { class: "muted", style: { whiteSpace: "pre-wrap" } }, e.message)))),
     h("div", { class: "row", style: { justifyContent: "flex-end" } },
-      h("button", { class: "btn", onclick: () => { store.clearErrors(); close(); } }, "Clear"),
-      h("button", { class: "btn primary", onclick: () => { store.emit("agent-prompt", "Fix these editor errors:\n" + store.errors.slice(-8).map((e) => `- ${e.source}: ${e.message}`).join("\n")); close(); } }, I.spark(), "Ask agent to fix"))));
+      h("button", { class: "btn", onclick: () => { store.clearErrors(); close(); } }, "Xoá"),
+      h("button", { class: "btn primary", onclick: () => { store.emit("agent-prompt", "Fix these editor errors:\n" + store.errors.slice(-8).map((e) => `- ${e.source}: ${e.message}`).join("\n")); close(); } }, I.spark(), "Nhờ agent sửa"))));
 }
 
 // ---------------- project lifecycle ----------------
@@ -176,24 +196,24 @@ async function openProject(dir: string) {
   pool.purgeMissing(store.project);
   setPage(store.page);
   timeline.fit();
-  document.title = `shdw — ${store.project.name}`;
+  document.title = `${APP_NAME} — ${store.project.name}`;
 }
 
 async function newProject() {
-  const parent = await open({ directory: true, title: "Choose where to create the project" });
+  const parent = await open({ directory: true, title: "Chọn nơi tạo dự án" });
   if (!parent) return;
-  const name = await prompt("Project name", "My Video");
+  const name = await prompt("Tên dự án", "Video của tôi");
   if (!name) return;
   await openProject(join(String(parent), name.replace(/[<>:"/\\|?*]+/g, "-")));
 }
 async function openExisting() {
-  const dir = await open({ directory: true, title: "Open a shdw project folder" });
+  const dir = await open({ directory: true, title: `Mở thư mục dự án ${APP_NAME}` });
   if (dir) await openProject(String(dir));
 }
 
 let welcome: HTMLElement | null = null;
 const fmtDur = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-const ago = (ms: number) => { if (!ms) return ""; const d = (Date.now() - ms) / 1000; return d < 3600 ? `${Math.max(1, Math.round(d / 60))}m ago` : d < 86400 ? `${Math.round(d / 3600)}h ago` : `${Math.round(d / 86400)}d ago`; };
+const ago = (ms: number) => { if (!ms) return ""; const d = (Date.now() - ms) / 1000; return d < 3600 ? `${Math.max(1, Math.round(d / 60))} phút trước` : d < 86400 ? `${Math.round(d / 3600)} giờ trước` : `${Math.round(d / 86400)} ngày trước`; };
 function closeWelcome() { welcome?.remove(); welcome = null; }
 function showWelcome() {
   closeWelcome();
@@ -206,37 +226,37 @@ function showWelcome() {
   welcome = h("div", { class: "welcome desk" },
     h("div", { class: "desk-inner" },
       h("header", { class: "desk-head" },
-        h("div", {}, h("div", { class: "eyebrow" }, "shdw · projects"), h("h1", {}, "Your projects")),
+        h("div", {}, h("div", { class: "eyebrow" }, `${APP_NAME} · dự án`), h("h1", {}, "Dự án của bạn")),
         h("div", { class: "row" },
-          store.dir ? h("button", { class: "btn ghost", onclick: () => closeWelcome() }, "Back to editor") : null,
-          h("button", { class: "btn", onclick: () => openExisting() }, I.folder(), "Open…"),
-          h("button", { class: "btn primary", onclick: () => newProject() }, I.plus(), "New project"))),
+          store.dir ? h("button", { class: "btn ghost", onclick: () => closeWelcome() }, "Quay lại trình dựng") : null,
+          h("button", { class: "btn", onclick: () => openExisting() }, I.folder(), "Mở…"),
+          h("button", { class: "btn primary", onclick: () => newProject() }, I.plus(), "Dự án mới"))),
       h("div", { class: "wtiles" },
-        h("div", { class: "wtile" }, h("h3", {}, "Projects"), h("p", { class: "big" }, count), h("p", { class: "sub" }, "in recents")),
-        tile("Claude Code", env.claude ? "Ready" : "Missing", env.claudeVersion ?? "not found", !!env.claude),
-        tile("Codex CLI", env.codex ? "Ready" : "Missing", env.codexVersion ?? "not found", !!env.codex),
-        tile("FFmpeg", env.ffmpeg ? "Ready" : "Missing", env.ffmpeg ? "decode · encode" : "winget install Gyan.FFmpeg", !!env.ffmpeg)),
-      rec.length ? grid : h("div", { class: "desk-empty" }, h("p", {}, "No projects yet."), h("p", { class: "faint" }, "Create one, or open an existing shdw folder.")),
-      h("p", { class: "desk-hint" }, "Hover to lean · Click to open · ··· for options")));
+        h("div", { class: "wtile" }, h("h3", {}, "Dự án"), h("p", { class: "big" }, count), h("p", { class: "sub" }, "gần đây")),
+        tile("Claude Code", env.claude ? "Sẵn sàng" : "Thiếu", env.claudeVersion ?? "không tìm thấy", !!env.claude),
+        tile("Codex CLI", env.codex ? "Sẵn sàng" : "Thiếu", env.codexVersion ?? "không tìm thấy", !!env.codex),
+        tile("FFmpeg", env.ffmpeg ? "Sẵn sàng" : "Thiếu", env.ffmpeg ? "giải mã · mã hoá" : "winget install Gyan.FFmpeg", !!env.ffmpeg)),
+      rec.length ? grid : h("div", { class: "desk-empty" }, h("p", {}, "Chưa có dự án nào."), h("p", { class: "faint" }, "Tạo mới, hoặc mở một thư mục dự án có sẵn.")),
+      h("p", { class: "desk-hint" }, "Rê chuột để nghiêng · Bấm để mở · ··· để xem tuỳ chọn")));
   const forget = (d: string) => { localStorage.setItem("shdw.recent", JSON.stringify(recents().filter((x) => !sameDir(x, d)))); };
   rec.forEach(async (d, i) => {
     const info = await projectInfo(d);
     const cur = !!store.dir && sameDir(store.dir, d);
     const card = glassFolder({
       label: info.name, seed: hashDir(d), delay: i * 90, current: cur,
-      meta: info.clips ? `${info.clips} clips · ${fmtDur(info.duration)}${info.modified ? " · " + ago(info.modified) : ""}` : "Empty project",
+      meta: info.clips ? `${info.clips} clip · ${fmtDur(info.duration)}${info.modified ? " · " + ago(info.modified) : ""}` : "Dự án trống",
       files: info.renders.length ? info.renders.map((r) => ({ name: r.name, image: r.image })) : [{ name: "project.shdw.json", meta: "JSON" }],
       onOpen: () => (cur ? closeWelcome() : openProject(d).catch((e) => toast(String(e)))),
       menu: [
-        { label: "Open", run: () => (cur ? closeWelcome() : openProject(d).catch((e) => toast(String(e)))) },
-        { label: "Show in Explorer", run: () => void fs.reveal(d) },
-        { label: "Remove from list", run: () => { forget(d); card.remove(); count.textContent = String(recents().length); } },
-        { label: "Delete project…", danger: true, run: async () => {
-          if (cur) return toast("Close this project first (open another one), then delete it.");
-          if (!(await confirmDialog(`Delete “${info.name}”?`, `This permanently deletes the folder and everything in it:
-${d}`, "Delete"))) return;
-          try { await fs.remove(d); forget(d); card.remove(); count.textContent = String(recents().length); toast("Project deleted"); }
-          catch (e) { toast("Delete failed: " + e); }
+        { label: "Mở", run: () => (cur ? closeWelcome() : openProject(d).catch((e) => toast(String(e)))) },
+        { label: "Hiện trong Explorer", run: () => void fs.reveal(d) },
+        { label: "Xoá khỏi danh sách", run: () => { forget(d); card.remove(); count.textContent = String(recents().length); } },
+        { label: "Xoá dự án…", danger: true, run: async () => {
+          if (cur) return toast("Hãy đóng dự án này trước (mở dự án khác) rồi mới xoá.");
+          if (!(await confirmDialog(`Xoá “${info.name}”?`, `Thao tác này sẽ xoá vĩnh viễn thư mục và mọi thứ bên trong:
+${d}`, "Xoá"))) return;
+          try { await fs.remove(d); forget(d); card.remove(); count.textContent = String(recents().length); toast("Đã xoá dự án"); }
+          catch (e) { toast("Xoá thất bại: " + e); }
         } },
       ],
     });
@@ -285,14 +305,14 @@ void getCurrentWebview().onDragDropEvent(async (e) => {
   const paths = e.payload.paths;
   if (store.page === "media" && (document.getElementById("media-title")?.textContent ?? "").startsWith("inspo")) {
     for (const p of paths) await fs.copy(p, join(store.dir, "inspo", basename(p)));
-    store.emit("files"); toast(`Added ${paths.length} inspiration item(s)`);
+    store.emit("files"); toast(`Đã thêm ${paths.length} mục cảm hứng`);
     return;
   }
   const media = await importFiles(paths, localStorage.getItem("shdw.copyMedia") === "1");
   const pos = e.payload.position;
   const target = document.elementFromPoint(pos.x / devicePixelRatio, pos.y / devicePixelRatio);
   if (target?.closest(".tl-canvas")) { let t = store.duration; for (const m of media) { act.placeMedia(m, t); t += m.duration; } }
-  toast(`Imported ${media.length} file(s)`);
+  toast(`Đã nhập ${media.length} tệp`);
 });
 
 // ---------------- keyboard ----------------
@@ -306,7 +326,7 @@ addEventListener("keydown", (e) => {
   if (ctrl && k.toLowerCase() === "k") { handled(); agent.show(); (agent.el.querySelector("textarea") as HTMLTextAreaElement)?.focus(); return; }
   if (ctrl && k.toLowerCase() === "z") { handled(); e.shiftKey ? store.redo() : store.undo(); return; }
   if (ctrl && k.toLowerCase() === "y") { handled(); store.redo(); return; }
-  if (ctrl && k.toLowerCase() === "s") { handled(); void store.save().then(() => toast("Saved")); return; }
+  if (ctrl && k.toLowerCase() === "s") { handled(); void store.save().then(() => toast("Đã lưu")); return; }
   if (ctrl && k.toLowerCase() === "i") { handled(); void import("./ui/library").then((m) => m.pickAndImport()); return; }
   if (ctrl && k.toLowerCase() === "o") { handled(); showWelcome(); return; }
   if (!store.dir) return;
@@ -345,7 +365,7 @@ addEventListener("keydown", (e) => {
     case "t": case "T": handled(); store.tool = "trim"; store.emit("tool"); break;
     case "h": case "H": handled(); store.tool = "hand"; store.emit("tool"); break;
     case "m": case "M": handled(); act.addMarker(); break;
-    case "n": case "N": handled(); store.snapping = !store.snapping; toast(`Snapping ${store.snapping ? "on" : "off"}`); break;
+    case "n": case "N": handled(); store.snapping = !store.snapping; toast(`Bắt dính: ${store.snapping ? "bật" : "tắt"}`); break;
     case "d": case "D": handled(); act.toggleEnabled(); break;
     case "z": case "Z": if (e.shiftKey) { handled(); timeline.fit(); } break;
     case "=": case "+": handled(); store.zoom = Math.min(600, store.zoom * 1.3); store.emit("zoom"); break;

@@ -70,21 +70,46 @@ export interface Project {
   media: Media[]; tracks: Track[]; clips: Clip[]; markers: Marker[];
 }
 
+/** Vietnamese role names for the default tracks (ids stay V1/A1/S1 so the agent API is unchanged). */
+export const TRACK_ROLE_NAMES: Record<string, string> = {
+  S1: "Phụ đề",
+  V4: "Chữ graphic",
+  V3: "Graphic",
+  V2: "Cảnh",
+  V1: "Video chính",
+  A1: "Nhạc nền",
+  A2: "Giọng",
+  A3: "SFX",
+  A4: "Âm gốc",
+};
+
+/** Names given by earlier builds of this translation — migrated to the current role names on load. */
+const OLD_ROLE_NAMES: Record<string, string[]> = {
+  A1: ["Âm thanh"], A3: ["Âm thanh 2"], A4: ["Âm thanh 3"],
+};
+
+/** Icon shown in the track header, by track id (falls back to the track kind). */
+export const TRACK_ROLE_ICONS: Record<string, string> = {
+  S1: "💬", V4: "T", V3: "✦", V2: "▦", V1: "🎞", A1: "♫", A2: "〰", A3: "✺", A4: "🔊",
+};
+export const trackIcon = (t: Track) =>
+  TRACK_ROLE_ICONS[t.id] ?? (t.kind === "audio" ? "♫" : t.kind === "subtitle" ? "💬" : "▭");
+
 export const defaultProject = (name = "Untitled"): Project => ({
   version: 1,
   name,
   settings: { width: 1920, height: 1080, fps: 30, background: "#000000" },
   media: [],
   tracks: [
-    { id: "V1", kind: "video", name: "V1" },
-    { id: "V2", kind: "video", name: "V2" },
-    { id: "V3", kind: "video", name: "V3" },
-    { id: "V4", kind: "video", name: "V4" },
-    { id: "A1", kind: "audio", name: "A1", volume: 1, pan: 0 },
-    { id: "A2", kind: "audio", name: "A2", volume: 1, pan: 0 },
-    { id: "A3", kind: "audio", name: "A3", volume: 1, pan: 0 },
-    { id: "A4", kind: "audio", name: "A4", volume: 1, pan: 0 },
-    { id: "S1", kind: "subtitle", name: "Subtitles", style: { font: "Inter", size: 54, weight: 600, color: "#ffffff", y: 0.88, background: { color: "rgba(0,0,0,0.55)", padding: 14, radius: 10 } } },
+    { id: "V1", kind: "video", name: TRACK_ROLE_NAMES.V1 },
+    { id: "V2", kind: "video", name: TRACK_ROLE_NAMES.V2 },
+    { id: "V3", kind: "video", name: TRACK_ROLE_NAMES.V3 },
+    { id: "V4", kind: "video", name: TRACK_ROLE_NAMES.V4 },
+    { id: "A1", kind: "audio", name: TRACK_ROLE_NAMES.A1, volume: 1, pan: 0 },
+    { id: "A2", kind: "audio", name: TRACK_ROLE_NAMES.A2, volume: 1, pan: 0 },
+    { id: "A3", kind: "audio", name: TRACK_ROLE_NAMES.A3, volume: 1, pan: 0 },
+    { id: "A4", kind: "audio", name: TRACK_ROLE_NAMES.A4, volume: 1, pan: 0 },
+    { id: "S1", kind: "subtitle", name: TRACK_ROLE_NAMES.S1, style: { font: "Inter", size: 54, weight: 600, color: "#ffffff", y: 0.88, background: { color: "rgba(0,0,0,0.55)", padding: 14, radius: 10 } } },
   ],
   clips: [],
   markers: [],
@@ -102,6 +127,11 @@ export function normalize(p: any): Project {
     clips: Array.isArray(p?.clips) ? p.clips : [],
     markers: Array.isArray(p?.markers) ? p.markers : [],
   };
+  // Older projects: tracks still carry their bare id (or the old "Subtitles") as name → give them role names.
+  for (const t of out.tracks) {
+    const stale = t.name === t.id || (t.id === "S1" && t.name === "Subtitles") || OLD_ROLE_NAMES[t.id]?.includes(t.name);
+    if (stale && TRACK_ROLE_NAMES[t.id]) t.name = TRACK_ROLE_NAMES[t.id];
+  }
   for (const c of out.clips) {
     c.start = +c.start || 0;
     c.duration = Math.max(1 / out.settings.fps, +c.duration || 1);

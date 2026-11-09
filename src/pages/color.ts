@@ -25,18 +25,18 @@ export class ColorPage {
     this.wheels = h("div", { class: "wheels" });
     this.scopeCv = h("canvas", { width: 640, height: 400 });
     const tabs = h("div", { class: "tabs" });
-    const paintTabs = () => { clear(tabs); for (const m of ["waveform", "parade", "vectorscope", "histogram"]) tabs.appendChild(h("button", { class: this.scopeMode === m ? "on" : "", onclick: () => { this.scopeMode = m; paintTabs(); this.drawScope(true); } }, m[0].toUpperCase() + m.slice(1))); };
+    const paintTabs = () => { clear(tabs); for (const m of ["waveform", "parade", "vectorscope", "histogram"]) tabs.appendChild(h("button", { class: this.scopeMode === m ? "on" : "", onclick: () => { this.scopeMode = m; paintTabs(); this.drawScope(true); } }, ({ waveform: "Dạng sóng", parade: "Parade", vectorscope: "Vectorscope", histogram: "Biểu đồ" } as Record<string, string>)[m])); };
     paintTabs();
     this.el = h("div", { class: "page page-color" },
       h("div", { class: "p-viewer", style: { display: "flex", minHeight: "0" } }),
-      h("div", { class: "panel p-scopes scopes" }, h("header", {}, h("h3", {}, "Scopes"), h("div", { class: "grow" }), tabs), h("div", { style: { padding: "8px" } }, this.scopeCv)),
+      h("div", { class: "panel p-scopes scopes" }, h("header", {}, h("h3", {}, "Đo màu"), h("div", { class: "grow" }), tabs), h("div", { style: { padding: "8px" } }, this.scopeCv)),
       h("div", { class: "panel p-strip" }, this.strip),
-      h("div", { class: "panel p-wheels" }, h("header", {}, h("h3", {}, "Primaries"), h("div", { class: "grow" }),
-        h("button", { class: "btn sm", onclick: () => this.copyGrade() }, "Copy grade"),
-        h("button", { class: "btn sm", onclick: () => this.pasteGrade() }, "Paste grade"),
-        h("button", { class: "btn sm", onclick: () => this.applyAll() }, "Apply to all"),
-        h("button", { class: "btn sm danger", onclick: () => this.reset() }, "Reset"),
-        h("button", { class: "btn sm primary", onclick: () => this.aiGrade() }, I.spark(), "AI grade")), this.wheels));
+      h("div", { class: "panel p-wheels" }, h("header", {}, h("h3", {}, "Màu cơ bản"), h("div", { class: "grow" }),
+        h("button", { class: "btn sm", onclick: () => this.copyGrade() }, "Sao chép màu"),
+        h("button", { class: "btn sm", onclick: () => this.pasteGrade() }, "Dán màu"),
+        h("button", { class: "btn sm", onclick: () => this.applyAll() }, "Áp dụng cho tất cả"),
+        h("button", { class: "btn sm danger", onclick: () => this.reset() }, "Đặt lại"),
+        h("button", { class: "btn sm primary", onclick: () => this.aiGrade() }, I.spark(), "AI chỉnh màu")), this.wheels));
     store.on("selection", () => this.el.isConnected && this.render());
     store.on("project", (w) => { if (this.el.isConnected && w !== "inspector" && w !== "color") this.render(); });
     store.on("rendered", () => this.el.isConnected && this.drawScope());
@@ -71,7 +71,7 @@ export class ColorPage {
     }
     clear(this.wheels);
     const c = this.current();
-    if (!c) { this.wheels.appendChild(h("div", { class: "empty" }, "Select a video clip to grade.")); return; }
+    if (!c) { this.wheels.appendChild(h("div", { class: "empty" }, "Chọn một clip video để chỉnh màu.")); return; }
     const g: Grade = c.grade ?? {};
     const touch = () => { if (!c.grade) c.grade = g; };
     for (const w of WHEELS) this.wheels.appendChild(this.wheel(c, g, touch, w.key, w.label, w.range));
@@ -81,14 +81,14 @@ export class ColorPage {
       s.range.addEventListener("dblclick", () => { (g as any)[key] = def; s.set(def); store.changed("color"); });
       return h("div", { class: "field" }, h("label", {}, label), h("div", { class: "ctl" }, s.range, s.num), h("span"));
     };
-    prim.append(row("Exposure", "exposure", -4, 4, 0.01, 0), row("Contrast", "contrast", 0, 2.5, 0.01, 1), row("Pivot", "pivot", 0, 1, 0.005, 0.435),
-      row("Saturation", "saturation", 0, 3, 0.01, 1), row("Vibrance", "vibrance", -1, 1, 0.01, 0), row("Temperature", "temperature", -1, 1, 0.01, 0),
-      row("Tint", "tint", -1, 1, 0.01, 0), row("Hue", "hue", -180, 180, 0.5, 0), row("Highlights", "highlights", -1, 1, 0.01, 0), row("Shadows", "shadows", -1, 1, 0.01, 0));
+    prim.append(row("Phơi sáng", "exposure", -4, 4, 0.01, 0), row("Tương phản", "contrast", 0, 2.5, 0.01, 1), row("Điểm tựa", "pivot", 0, 1, 0.005, 0.435),
+      row("Độ bão hoà", "saturation", 0, 3, 0.01, 1), row("Độ rực", "vibrance", -1, 1, 0.01, 0), row("Nhiệt độ", "temperature", -1, 1, 0.01, 0),
+      row("Sắc độ", "tint", -1, 1, 0.01, 0), row("Tông màu", "hue", -180, 180, 0.5, 0), row("Vùng sáng", "highlights", -1, 1, 0.01, 0), row("Vùng tối", "shadows", -1, 1, 0.01, 0));
     const lut = h("select", { style: { width: "100%" } }) as HTMLSelectElement;
-    lut.appendChild(h("option", { value: "" }, "No LUT"));
+    lut.appendChild(h("option", { value: "" }, "Không dùng LUT"));
     void fs.list(join(store.dir, "luts")).then((es) => es.filter((e) => e.name.toLowerCase().endsWith(".cube")).forEach((e) => lut.appendChild(h("option", { value: `luts/${e.name}`, selected: g.lut === `luts/${e.name}` }, e.name)))).catch(() => {});
     lut.addEventListener("change", () => { store.mutate("lut", () => { touch(); g.lut = lut.value || undefined; }); });
-    prim.append(h("div", { class: "field" }, h("label", {}, "LUT"), h("div", { class: "ctl" }, lut), h("span")), row("LUT mix", "lutMix", 0, 1, 0.01, 1));
+    prim.append(h("div", { class: "field" }, h("label", {}, "LUT"), h("div", { class: "ctl" }, lut), h("span")), row("Mức LUT", "lutMix", 0, 1, 0.01, 1));
     this.wheels.appendChild(prim);
   }
 
@@ -141,7 +141,7 @@ export class ColorPage {
     return h("div", { class: "wheel" }, h("div", { class: "lbl" }, label), cv, master.range, vals);
   }
 
-  private copyGrade() { const c = this.current(); if (c?.grade) { gradeClipboard = deepClone(c.grade); store.emit("toast", "Grade copied"); } }
+  private copyGrade() { const c = this.current(); if (c?.grade) { gradeClipboard = deepClone(c.grade); store.emit("toast", "Đã sao chép màu"); } }
   private pasteGrade() { const c = this.current(); if (c && gradeClipboard) store.mutate("paste grade", () => { c.grade = deepClone(gradeClipboard!); }); }
   private applyAll() { const c = this.current(); if (!c?.grade) return; const g = c.grade; store.mutate("grade all", () => { for (const x of this.gradable()) if (x.source.type === "media") x.grade = deepClone(g); }); }
   private reset() { const c = this.current(); if (c) store.mutate("reset grade", () => { delete c.grade; }); }

@@ -65,7 +65,7 @@ export async function importFiles(paths: string[], copy = false): Promise<Media[
       const m: Media = { id: uid("m"), ...info, path: store.rel(path) };
       added.push(m);
     } catch (err: any) {
-      store.error(basename(path), "import failed: " + (err?.message ?? err));
+      store.error(basename(path), "nhập thất bại: " + (err?.message ?? err));
     }
   }
   const fresh = added.filter((m) => !store.project.media.includes(m));
@@ -111,9 +111,9 @@ export async function makeProxy(m: Media) {
   try {
     if (!(await fs.exists(out))) await invoke("make_proxy", { id: m.id, path: store.abs(m.path), out });
     store.mutate("proxy", (p) => { const mm = p.media.find((x) => x.id === m.id); if (mm) mm.proxy = store.rel(out); });
-    store.emit("toast", `Optimized media ready: ${m.name}`);
+    store.emit("toast", `Media tối ưu đã sẵn sàng: ${m.name}`);
   } catch (e: any) {
-    store.error(m.name, "proxy failed: " + e);
+    store.error(m.name, "tạo proxy thất bại: " + e);
   } finally {
     proxying.delete(m.id);
     store.emit("thumbs");
@@ -126,12 +126,12 @@ export interface Segment { start: number; end: number; text: string }
 export async function transcribe(m: Media, force = false): Promise<Segment[]> {
   const out = join(store.dir, "transcripts", m.id + ".json");
   if (!force && (await fs.exists(out))) return JSON.parse(await fs.readText(out)).segments ?? [];
-  store.emit("toast", `Transcribing ${m.name}…`);
+  store.emit("toast", `Đang chép lời ${m.name}…`);
   const raw = await invoke<string>("transcribe", { path: store.abs(m.path), model: localStorage.getItem("shdw.whisperModel") || "base", language: null });
   const segments = parseWhisper(raw);
   await fs.writeText(out, JSON.stringify({ media: m.id, segments }, null, 2));
   store.mutate("transcript", (p) => { const mm = p.media.find((x) => x.id === m.id); if (mm) mm.transcript = store.rel(out); });
-  store.emit("toast", `Transcript ready (${segments.length} segments)`);
+  store.emit("toast", `Bản chép lời đã sẵn sàng (${segments.length} đoạn)`);
   return segments;
 }
 

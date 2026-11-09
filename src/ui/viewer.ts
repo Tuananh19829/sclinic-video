@@ -16,30 +16,30 @@ export class Viewer {
   private playBtn: HTMLButtonElement;
   private safe: HTMLElement;
 
-  constructor(public renderer: Renderer, title = "Timeline Viewer") {
+  constructor(public renderer: Renderer, title = "Xem trước Timeline") {
     this.safe = h("div", { class: "safe", style: { display: "none", zIndex: "5" } });
     this.stage = h("div", { class: "viewer" }, this.safe);
     this.tc = h("span", { class: "timecode" }, "00:00:00:00");
     this.dur = h("span", { class: "timecode dim" }, "");
-    this.playBtn = h("button", { class: "btn icon ghost", title: "Play (Space)", onclick: () => playback.toggle() }, I.play());
+    this.playBtn = h("button", { class: "btn icon ghost", title: "Phát (Space)", onclick: () => playback.toggle() }, I.play());
     const scale = h("select", { style: { width: "86px" } }) as HTMLSelectElement;
-    for (const [l, v] of [["Full", 1], ["Half", 0.5], ["Quarter", 0.25]] as [string, number][]) scale.appendChild(h("option", { value: v, selected: store.previewScale === v }, l));
+    for (const [l, v] of [["Đầy đủ", 1], ["1/2", 0.5], ["1/4", 0.25]] as [string, number][]) scale.appendChild(h("option", { value: v, selected: store.previewScale === v }, l));
     scale.addEventListener("change", () => { store.previewScale = +scale.value; store.emit("frame-ready"); });
-    const loop = h("button", { class: "btn icon ghost sm" + (store.loopPlayback ? " on" : ""), title: "Loop", onclick: () => { store.loopPlayback = !store.loopPlayback; loop.classList.toggle("on", store.loopPlayback); } }, I.loop());
-    const live = h("button", { class: "btn ghost sm" + (store.liveHtml ? " on" : ""), title: "Live HTML preview — compositions play as real DOM: sharp and real-time. Off = exact rendered frames (what export produces).", onclick: () => {
+    const loop = h("button", { class: "btn icon ghost sm" + (store.loopPlayback ? " on" : ""), title: "Lặp lại", onclick: () => { store.loopPlayback = !store.loopPlayback; loop.classList.toggle("on", store.loopPlayback); } }, I.loop());
+    const live = h("button", { class: "btn ghost sm" + (store.liveHtml ? " on" : ""), title: "Xem trước HTML trực tiếp — bố cục chạy bằng DOM thật: sắc nét, theo thời gian thực. Tắt = khung hình render chính xác (giống khi xuất).", onclick: () => {
       store.liveHtml = !store.liveHtml; live.classList.toggle("on", store.liveHtml);
       try { localStorage.setItem("shdw.liveHtml", store.liveHtml ? "1" : "0"); } catch {}
       if (!store.liveHtml) liveHtml.clear();
       this.info(); store.emit("frame-ready");
     } }, "Live");
-    const safeBtn = h("button", { class: "btn ghost sm", title: "Safe area", onclick: () => { this.safe.style.display = this.safe.style.display === "none" ? "block" : "none"; this.layoutSafe(); } }, "Safe");
+    const safeBtn = h("button", { class: "btn ghost sm", title: "Vùng an toàn", onclick: () => { this.safe.style.display = this.safe.style.display === "none" ? "block" : "none"; this.layoutSafe(); } }, "An toàn");
     const transport = h("div", { class: "transport" },
       this.tc, h("div", { class: "grow" }),
-      h("button", { class: "btn icon ghost", title: "Go to start (Home)", onclick: () => store.seek(0) }, I.prev()),
-      h("button", { class: "btn icon ghost", title: "Previous frame (←)", onclick: () => store.seek(store.playhead - 1 / store.fps) }, I.stepB()),
+      h("button", { class: "btn icon ghost", title: "Về đầu (Home)", onclick: () => store.seek(0) }, I.prev()),
+      h("button", { class: "btn icon ghost", title: "Khung trước (←)", onclick: () => store.seek(store.playhead - 1 / store.fps) }, I.stepB()),
       this.playBtn,
-      h("button", { class: "btn icon ghost", title: "Next frame (→)", onclick: () => store.seek(store.playhead + 1 / store.fps) }, I.stepF()),
-      h("button", { class: "btn icon ghost", title: "Go to end (End)", onclick: () => store.seek(store.duration) }, I.next()),
+      h("button", { class: "btn icon ghost", title: "Khung sau (→)", onclick: () => store.seek(store.playhead + 1 / store.fps) }, I.stepF()),
+      h("button", { class: "btn icon ghost", title: "Tới cuối (End)", onclick: () => store.seek(store.duration) }, I.next()),
       loop, h("div", { class: "grow" }), live, safeBtn, scale, this.dur);
     this.el = h("div", { class: "panel p-viewer" }, h("header", {}, h("h3", {}, title), h("div", { class: "grow" }), h("span", { class: "faint", id: "vw-info" })), this.stage, transport);
     store.on("cache-progress", () => this.info());
@@ -56,12 +56,12 @@ export class Viewer {
     const info = this.el.querySelector("#vw-info") as HTMLElement | null;
     if (!info) return;
     if (store.liveHtml) {
-      info.textContent = liveHtml.active ? "● Live" : "";
+      info.textContent = liveHtml.active ? "● Trực tiếp" : "";
       info.style.color = "var(--green)";
       return;
     }
     const { cached, total } = htmlFrames.stats;
-    info.textContent = total ? (cached >= total ? "● Render cache ready" : `◐ Caching motion ${Math.round((cached / total) * 100)}%`) : "";
+    info.textContent = total ? (cached >= total ? "● Bộ đệm render sẵn sàng" : `◐ Đang đệm motion ${Math.round((cached / total) * 100)}%`) : "";
     info.style.color = cached >= total ? "var(--green)" : "var(--orange)";
   }
 

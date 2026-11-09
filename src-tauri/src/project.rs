@@ -180,6 +180,13 @@ pub fn reveal(path: String) {
     let _ = tools::cmd("explorer").arg(format!("/select,{}", path.replace('/', "\\"))).spawn();
 }
 
+/// Open an https link in the default browser (used by the About screen).
+#[tauri::command]
+pub fn open_url(url: String) -> Result<(), String> {
+    if !url.starts_with("https://") { return Err("only https links".into()); }
+    tools::cmd("explorer").arg(url).spawn().map(|_| ()).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 pub fn startup_project() -> Option<String> {
     std::env::args().skip(1).find(|a| !a.starts_with('-') && Path::new(a).is_dir())

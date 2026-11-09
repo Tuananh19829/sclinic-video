@@ -125,9 +125,9 @@ class Store {
       this.lastWritten = text;
       for (const id of [...this.selection]) if (!this.clip(id)) this.selection.delete(id);
       this.emit("project", "external");
-      this.emit("toast", "Project updated by agent");
+      this.emit("toast", "Agent đã cập nhật dự án");
     } catch (e: any) {
-      this.error("project.shdw.json", "Invalid JSON: " + e.message);
+      this.error("project.shdw.json", "JSON không hợp lệ: " + e.message);
     }
   }
 

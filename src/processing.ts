@@ -19,8 +19,8 @@ function srcRange(c: Clip) {
 
 export async function sceneDetect(c: Clip, threshold = 0.32) {
   const m = mediaOf(store.project, c);
-  if (!m || m.kind !== "video") throw new Error("Scene detection needs a video clip");
-  store.emit("toast", "Detecting scene cuts…");
+  if (!m || m.kind !== "video") throw new Error("Phát hiện cảnh cần một clip video");
+  store.emit("toast", "Đang phát hiện điểm chuyển cảnh…");
   const cuts = await invoke<number[]>("detect_scenes", { path: store.abs(m.path), threshold });
   const { sin, sp, sout } = srcRange(c);
   const times = cuts.filter((t) => t > sin + 0.1 && t < sout - 0.1).map((t) => frameSnap(c.start + (t - sin) / sp, store.fps));
@@ -46,14 +46,14 @@ export async function sceneDetect(c: Clip, threshold = 0.32) {
       }
     }
   });
-  store.emit("toast", `${times.length} scene cuts`);
+  store.emit("toast", `${times.length} điểm chuyển cảnh`);
   return times.length;
 }
 
 export async function removeSilence(c: Clip, noiseDb = -32, minDur = 0.45, pad = 0.08) {
   const m = mediaOf(store.project, c);
-  if (!m || (m.kind !== "audio" && !m.hasAudio)) throw new Error("Clip has no audio");
-  store.emit("toast", "Finding silences…");
+  if (!m || (m.kind !== "audio" && !m.hasAudio)) throw new Error("Clip không có âm thanh");
+  store.emit("toast", "Đang tìm đoạn im lặng…");
   const sil = await invoke<[number, number][]>("detect_silence", { path: store.abs(m.path), noiseDb, minDur });
   const { sin, sp, sout } = srcRange(c);
   const ranges = sil
@@ -62,7 +62,7 @@ export async function removeSilence(c: Clip, noiseDb = -32, minDur = 0.45, pad =
     .map(([a, b]) => [frameSnap(c.start + (a - sin) / sp, store.fps), frameSnap(c.start + (b - sin) / sp, store.fps)] as [number, number])
     .sort((x, y) => y[0] - x[0]);
   for (const [a, b] of ranges) rippleDeleteRange(a, b);
-  store.emit("toast", `Removed ${ranges.length} silences`);
+  store.emit("toast", `Đã xoá ${ranges.length} đoạn im lặng`);
   return ranges.length;
 }
 
@@ -74,14 +74,14 @@ export async function normalizeLoudness(c: Clip, target = -14) {
   store.mutate("normalize", (p) => {
     for (const x of p.clips) if (x.source.type === "media" && (x.source as any).media === m.id && p.tracks.find((t) => t.id === x.track)?.kind === "audio") x.volume = +gain.toFixed(3);
   });
-  store.emit("toast", `${lufs.toFixed(1)} LUFS → ${target} LUFS (gain ${gain.toFixed(2)}×)`);
+  store.emit("toast", `${lufs.toFixed(1)} LUFS → ${target} LUFS (tăng ${gain.toFixed(2)}×)`);
 }
 
 /** Energy-flux onset detection on the cached waveform → timeline markers. */
 export function detectBeats(c: Clip) {
   const m = mediaOf(store.project, c);
   const wf = m && waveforms.get(m.id);
-  if (!wf) throw new Error("Waveform not ready yet");
+  if (!wf) throw new Error("Dạng sóng chưa sẵn sàng");
   const { sin, sp, sout } = srcRange(c);
   const a = Math.floor(sin * 100), b = Math.min(wf.length, Math.floor(sout * 100));
   const env: number[] = [];
@@ -97,20 +97,20 @@ export function detectBeats(c: Clip) {
     if (flux[i] > mean + 1.6 * sd && flux[i] >= flux[i - 1] && flux[i] >= flux[i + 1] && i - last > 22) { beats.push(i); last = i; }
   }
   const times = beats.map((i) => frameSnap(c.start + ((a + i) / 100 - sin) / sp, store.fps));
-  store.mutate("beats", (p) => { for (const t of times) p.markers.push({ t, name: "beat", color: "#ff375f" }); });
-  store.emit("toast", `${times.length} beats marked`);
+  store.mutate("beats", (p) => { for (const t of times) p.markers.push({ t, name: "nhịp", color: "#ff375f" }); });
+  store.emit("toast", `Đã đánh dấu ${times.length} nhịp`);
   return times;
 }
 
 type Proc = "stabilize" | "denoise" | "audioDenoise" | "voiceEnhance" | "reverse" | "slowmo";
 export const PROCS: Record<Proc, string> = {
-  stabilize: "Stabilize", denoise: "Video noise reduction", audioDenoise: "Audio noise reduction",
-  voiceEnhance: "Voice enhance (dialogue)", reverse: "Reverse clip", slowmo: "Optical-flow slow motion (25%)",
+  stabilize: "Chống rung", denoise: "Giảm nhiễu video", audioDenoise: "Giảm nhiễu âm thanh",
+  voiceEnhance: "Tăng cường giọng nói (thoại)", reverse: "Đảo ngược clip", slowmo: "Quay chậm optical-flow (25%)",
 };
 
 export async function processClip(c: Clip, kind: Proc) {
   const m = mediaOf(store.project, c);
-  if (!m || m.kind === "image") throw new Error("Needs a video or audio clip");
+  if (!m || m.kind === "image") throw new Error("Cần một clip video hoặc âm thanh");
   const { sin, sp, sout } = srcRange(c);
   const isAudio = m.kind === "audio";
   const ext = isAudio ? "wav" : "mp4";
@@ -126,7 +126,7 @@ export async function processClip(c: Clip, kind: Proc) {
     case "reverse": partial = true; args = [...trim, ...(isAudio ? ["-af", "areverse"] : ["-vf", "reverse", ...(m.hasAudio ? ["-af", "areverse"] : []), ...enc, ...(m.hasAudio ? aenc : [])])]; break;
     case "slowmo": partial = true; stretch = 4; args = [...trim, "-vf", `minterpolate=fps=${fps * 4}:mi_mode=mci:mc_mode=aobmc:vsbmc=1,setpts=4*PTS,fps=${fps}`, "-an", ...enc]; break;
   }
-  store.emit("toast", `${PROCS[kind]}: processing ${m.name}…`);
+  store.emit("toast", `${PROCS[kind]}: đang xử lý ${m.name}…`);
   await invoke<string>("ffmpeg_process", { input: store.abs(m.path), args, output: out });
   const [nm] = await importFiles([out]);
   store.mutate(kind, (p) => {
@@ -141,7 +141,7 @@ export async function processClip(c: Clip, kind: Proc) {
     if (kind === "slowmo" && c.link) for (const x of p.clips) if (x.link === c.link && x.id !== c.id) delete x.link;
     nm.name = `${m.name} · ${PROCS[kind]}`;
   });
-  store.emit("toast", `${PROCS[kind]} done`);
+  store.emit("toast", `${PROCS[kind]}: xong`);
 }
 
 export function toggleFreeze(c: Clip) {

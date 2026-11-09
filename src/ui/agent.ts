@@ -10,12 +10,12 @@ type Provider = "claude" | "codex";
 interface ChatItem { role: "user" | "assistant" | "tool" | "error" | "meta"; text: string; title?: string; detail?: string; image?: string }
 
 const SUGGESTIONS = [
-  "Make a 10s Apple-style product intro with kinetic typography",
-  "Cut my footage into a punchy 30s edit with music sync",
-  "Add animated captions to the whole video",
-  "Grade everything warm and cinematic",
-  "Create a custom glitch transition and use it between all clips",
-  "Look at inspo/ and make motion graphics in that style",
+  "Làm intro sản phẩm 10s phong cách Apple với chữ chuyển động",
+  "Cắt cảnh quay thành bản dựng 30s dồn dập, khớp nhạc",
+  "Thêm phụ đề động cho toàn bộ video",
+  "Chỉnh màu toàn bộ theo tông ấm, điện ảnh",
+  "Tạo hiệu ứng chuyển cảnh glitch riêng và dùng giữa mọi clip",
+  "Xem thư mục inspo/ và làm motion graphics theo phong cách đó",
 ];
 
 export class AgentPanel {
@@ -47,8 +47,8 @@ export class AgentPanel {
 
   constructor() {
     this.log = h("div", { class: "agent-log" });
-    this.input = h("textarea", { rows: 2, placeholder: "Describe what to make or change…  (Enter to send, Shift+Enter for newline)" }) as HTMLTextAreaElement;
-    this.sendBtn = h("button", { class: "send", title: "Send", onclick: () => (this.runId ? this.stop() : this.send()) }, I.send()) as HTMLButtonElement;
+    this.input = h("textarea", { rows: 2, placeholder: "Mô tả điều cần làm hoặc thay đổi…  (Enter để gửi, Shift+Enter để xuống dòng)" }) as HTMLTextAreaElement;
+    this.sendBtn = h("button", { class: "send", title: "Gửi", onclick: () => (this.runId ? this.stop() : this.send()) }, I.send()) as HTMLButtonElement;
     this.chips = h("div", { class: "chips" });
     this.headAv = h("div", { class: "av" });
     this.headName = h("div", { style: { fontWeight: 600 } });
@@ -59,13 +59,13 @@ export class AgentPanel {
     });
     this.input.addEventListener("input", () => { this.input.style.height = "auto"; this.input.style.height = Math.min(200, this.input.scrollHeight) + "px"; });
     const head = h("div", { class: "agent-head" }, this.headAv, h("div", { class: "grow" }, this.headName, this.status),
-      h("button", { class: "btn icon sm ghost", title: "New chat", onclick: () => this.newChat() }, I.plus()),
-      h("button", { class: "btn icon sm ghost", title: "Agent settings", onclick: (e: MouseEvent) => this.settings(e) }, I.gear()));
+      h("button", { class: "btn icon sm ghost", title: "Cuộc trò chuyện mới", onclick: () => this.newChat() }, I.plus()),
+      h("button", { class: "btn icon sm ghost", title: "Cài đặt agent", onclick: (e: MouseEvent) => this.settings(e) }, I.gear()));
     const composer = h("div", { class: "composer" },
       h("div", { class: "box" }, this.chips, this.input,
         h("div", { class: "bar" },
-          h("button", { class: "btn sm ghost", title: "Attach selected clips / playhead", onclick: () => this.attachSelection() }, I.link(), "Context"),
-          h("button", { class: "btn sm ghost", title: "Attach a file (inspo, media…)", onclick: () => this.attachFile() }, I.plus(), "File"),
+          h("button", { class: "btn sm ghost", title: "Đính kèm clip đã chọn / đầu phát", onclick: () => this.attachSelection() }, I.link(), "Ngữ cảnh"),
+          h("button", { class: "btn sm ghost", title: "Đính kèm tệp (inspo, media…)", onclick: () => this.attachFile() }, I.plus(), "Tệp"),
           h("div", { class: "grow" }), this.sendBtn)));
     this.el = h("div", { id: "agent" }, h("div", { class: "panel" }, head, this.log, composer));
     this.paintHead();
@@ -84,14 +84,14 @@ export class AgentPanel {
     this.headAv.className = "av " + p;
     this.headAv.textContent = p === "claude" ? "✳" : "◎";
     this.headName.textContent = p === "claude" ? "Claude Code" : "Codex";
-    this.status.textContent = (this.model || "default model") + (this.skip ? " · full access" : " · auto-edit");
+    this.status.textContent = (this.model || "model mặc định") + (this.skip ? " · toàn quyền" : " · tự động sửa");
   }
 
   private settings(e: MouseEvent) {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const box = h("div", { class: "menu", style: { left: r.right - 300 + "px", top: r.bottom + 6 + "px", width: "300px", padding: "12px" } });
     const prov = h("div", { class: "tabs" }, ...(["claude", "codex"] as Provider[]).map((p) => h("button", { class: this.provider === p ? "on" : "", onclick: () => { this.provider = p; box.remove(); this.settings(e); } }, p === "claude" ? "Claude Code" : "Codex")));
-    const model = h("input", { type: "text", value: this.model, placeholder: this.provider === "claude" ? "e.g. opus, sonnet, claude-opus-5-5" : "e.g. gpt-5-codex", style: { width: "100%" } }) as HTMLInputElement;
+    const model = h("input", { type: "text", value: this.model, placeholder: this.provider === "claude" ? "vd: opus, sonnet, claude-opus-5-5" : "vd: gpt-5-codex", style: { width: "100%" } }) as HTMLInputElement;
     model.addEventListener("change", () => { localStorage.setItem(`shdw.model.${this.provider}`, model.value.trim()); this.paintHead(); });
     model.addEventListener("keydown", (ev) => ev.stopPropagation());
     const skip = switchEl(this.skip, (v) => { localStorage.setItem("shdw.skipPerms", v ? "1" : "0"); this.paintHead(); });
@@ -99,11 +99,11 @@ export class AgentPanel {
     for (const m of ["tiny", "base", "small", "medium", "large-v3-turbo"]) wm.appendChild(h("option", { value: m, selected: (localStorage.getItem("shdw.whisperModel") || "base") === m }, m));
     wm.addEventListener("change", () => localStorage.setItem("shdw.whisperModel", wm.value));
     box.append(h("div", { class: "col" },
-      h("div", { class: "mh", style: { padding: 0 } }, "Agent CLI"), prov,
+      h("div", { class: "mh", style: { padding: 0 } }, "CLI của agent"), prov,
       h("div", { class: "mh", style: { padding: 0 } }, "Model"), model,
-      h("div", { class: "row" }, h("div", { class: "grow" }, h("div", {}, "Skip permissions"), h("div", { class: "faint", style: { fontSize: "11px" } }, this.provider === "claude" ? "--dangerously-skip-permissions" : "--dangerously-bypass-approvals-and-sandbox")), skip),
-      h("div", { class: "mh", style: { padding: 0 } }, "Whisper model (transcripts)"), wm,
-      h("div", { class: "faint", style: { fontSize: "11px" } }, `Runs in the project folder. Control API on port ${this.port}.`)));
+      h("div", { class: "row" }, h("div", { class: "grow" }, h("div", {}, "Bỏ qua cấp quyền"), h("div", { class: "faint", style: { fontSize: "11px" } }, this.provider === "claude" ? "--dangerously-skip-permissions" : "--dangerously-bypass-approvals-and-sandbox")), skip),
+      h("div", { class: "mh", style: { padding: 0 } }, "Model Whisper (lời thoại)"), wm,
+      h("div", { class: "faint", style: { fontSize: "11px" } }, `Chạy trong thư mục dự án. Control API ở cổng ${this.port}.`)));
     document.body.appendChild(box);
     setTimeout(() => { const off = (ev: Event) => { if (!box.contains(ev.target as Node)) { box.remove(); removeEventListener("pointerdown", off, true); } }; addEventListener("pointerdown", off, true); });
   }
@@ -142,7 +142,7 @@ export class AgentPanel {
       try { await invoke("agent_kill_pid", { pid: r.pid }); } catch { /* already gone */ }
       this.running = null;
       if (this.provider !== r.provider) this.provider = r.provider;
-      this.push({ role: "meta", text: "↻ Editor restarted mid-task — resuming the same agent session…" });
+      this.push({ role: "meta", text: "↻ Trình dựng đã khởi động lại giữa chừng — đang tiếp tục phiên agent cũ…" });
       setTimeout(() => void this.send("Continue the task exactly where you left off — the shdw editor was restarted while you were working, so your last command may not have completed. Check GET /state and GET /errors first, then finish the job and verify with /frames."), 1500);
     }
   }
@@ -162,8 +162,8 @@ export class AgentPanel {
     if (!this.items.length) {
       this.log.appendChild(h("div", { class: "empty", style: { height: "auto", paddingTop: "30px" } },
         h("div", { class: "col", style: { alignItems: "center", gap: "14px" } },
-          h("div", { style: { font: "700 22px var(--font-display)", letterSpacing: "-0.02em", color: "var(--label)" } }, "What are we making?"),
-          h("div", {}, `${this.provider === "claude" ? "Claude" : "Codex"} edits this project directly — timeline, motion graphics, transitions, effects, fonts, captions, grades.`),
+          h("div", { style: { font: "700 22px var(--font-display)", letterSpacing: "-0.02em", color: "var(--label)" } }, "Hôm nay mình làm gì?"),
+          h("div", {}, `${this.provider === "claude" ? "Claude" : "Codex"} chỉnh sửa trực tiếp dự án này — timeline, motion graphics, chuyển cảnh, hiệu ứng, phông chữ, phụ đề, chỉnh màu.`),
           h("div", { class: "suggest" }, ...SUGGESTIONS.map((s) => h("button", { onclick: () => { this.input.value = s; this.input.focus(); } }, s))))));
       return;
     }
@@ -205,6 +205,7 @@ export class AgentPanel {
       `Project folder (cwd): ${store.dir}`,
       `Control API: http://127.0.0.1:${this.port}  (read CLAUDE.md / AGENTS.md for the project format + API)`,
       `Timeline: ${p.settings.width}x${p.settings.height} @ ${p.settings.fps}fps, duration ${store.duration.toFixed(2)}s, ${p.clips.length} clips, ${p.media.length} media. Playhead ${store.playhead.toFixed(2)}s.`,
+      "Track roles: " + p.tracks.map((t) => `${t.id}="${t.name}"`).join(", ") + ". Default roles: V1 main talking-head footage, V2 scene/B-roll, V3 graphics/overlays, V4 text graphics (titles, keywords), A1 background music, A2 voice/voice-over, A3 sound effects (SFX: whoosh, pop, click on cuts/callouts), A4 original/ambient audio, S1 subtitles. Keep music and SFX well under the voice. Put new clips on the matching track.",
     ];
     const sel = store.selectedClips();
     if (sel.length) lines.push("Selected clips: " + sel.map((c) => `${c.id} "${c.name ?? ""}" [${c.track}, ${c.source.type}${(c.source as any).module ? " " + (c.source as any).module : ""}, ${c.start.toFixed(2)}–${clipEnd(c).toFixed(2)}s]`).join("; "));
@@ -217,7 +218,7 @@ export class AgentPanel {
   async send(override?: string) {
     const text = (override ?? this.input.value).trim();
     if (!text || this.runId) return;
-    if (!store.dir) { store.emit("toast", "Open a project first"); return; }
+    if (!store.dir) { store.emit("toast", "Hãy mở một dự án trước"); return; }
     if (!override) { this.input.value = ""; this.input.style.height = "auto"; }
     this.push({ role: "user", text });
     const prompt = text + "\n" + this.context();
@@ -239,7 +240,7 @@ export class AgentPanel {
   stop() {
     if (!this.runId) return;
     void invoke("agent_stop", { runId: this.runId });
-    this.push({ role: "meta", text: "Stopped" });
+    this.push({ role: "meta", text: "Đã dừng" });
     this.runId = null; this.setBusy(false);
     this.running = null; this.saveHistory();
   }
@@ -301,7 +302,7 @@ export class AgentPanel {
     if (ev.runId !== this.runId) return;
     if (ev.kind === "exit") {
       this.typing(false);
-      if (ev.data && ev.data !== 0) this.push({ role: "meta", text: `exited with code ${ev.data}` });
+      if (ev.data && ev.data !== 0) this.push({ role: "meta", text: `đã thoát với mã ${ev.data}` });
       this.runId = null; this.setBusy(false); this.cur = null;
       this.running = null;
       this.saveHistory();
@@ -345,7 +346,7 @@ export class AgentPanel {
         const secs = ((performance.now() - this.started) / 1000).toFixed(0);
         const cost = j.total_cost_usd != null ? ` · $${(+j.total_cost_usd).toFixed(3)}` : "";
         if (j.is_error || j.subtype !== "success") this.push({ role: "error", text: j.result ?? j.subtype ?? "error" });
-        this.push({ role: "meta", text: `✓ ${j.num_turns ?? ""} turns · ${secs}s${cost}` });
+        this.push({ role: "meta", text: `✓ ${j.num_turns ?? ""} lượt · ${secs}s${cost}` });
         this.saveHistory();
         break;
       }

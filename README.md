@@ -1,3 +1,23 @@
+# Sclinic Video
+
+> **Based on shdw by d4niel-fr — https://github.com/d4niel-fr/shdw-video-editor**
+
+Sclinic Video là **bản đã chỉnh sửa** từ [shdw](https://github.com/d4niel-fr/shdw-video-editor), phát hành miễn phí. Đây **không phải** bản shdw chính thức và không được tác giả gốc xác nhận.
+
+Những thay đổi so với shdw gốc:
+- Việt hoá giao diện.
+- Các lớp timeline có tên theo vai trò: Phụ đề, Chữ graphic, Graphic, Cảnh, Video chính, Nhạc nền, Giọng, SFX, Âm gốc (agent được báo vai trò từng lớp).
+- Màn hình Giới thiệu (bấm tên app trên thanh tiêu đề) có ghi công tác giả gốc và thông tin giấy phép.
+- Đổi tên và icon thành Sclinic Video.
+
+**Giấy phép:** GNU AGPL-3.0 kèm điều khoản ghi công của shdw — xem [LICENSE](LICENSE) và [NOTICE](NOTICE). Khi phân phối lại phải kèm mã nguồn theo cùng giấy phép và giữ nguyên ghi công. Thành phần bên thứ ba (Tauri, GSAP, FFmpeg, Claude Code, Codex) giữ giấy phép riêng.
+
+Build trên Windows: cài Node.js 22+, Rust và Visual Studio C++ Build Tools, rồi chạy `npm install` và `npm run tauri build`.
+
+---
+
+*README gốc của shdw bên dưới.*
+
 <div align="center">
 
 <img src="docs/banner.png" alt="shdw — the video editor where Claude Code is your motion designer" width="100%">

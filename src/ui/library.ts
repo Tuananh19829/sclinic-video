@@ -13,7 +13,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { fmtTime } from "./dom";
 
 export async function pickAndImport() {
-  const sel = await open({ multiple: true, title: "Import media", filters: [{ name: "Media", extensions: ["mp4", "mov", "m4v", "webm", "mkv", "avi", "mxf", "mp3", "wav", "m4a", "aac", "flac", "ogg", "png", "jpg", "jpeg", "gif", "webp", "svg"] }] });
+  const sel = await open({ multiple: true, title: "Nhập media", filters: [{ name: "Media", extensions: ["mp4", "mov", "m4v", "webm", "mkv", "avi", "mxf", "mp3", "wav", "m4a", "aac", "flac", "ogg", "png", "jpg", "jpeg", "gif", "webp", "svg"] }] });
   if (!sel) return;
   const paths = Array.isArray(sel) ? sel : [sel];
   await importFiles(paths.map(String), localStorage.getItem("shdw.copyMedia") === "1");
@@ -50,15 +50,15 @@ export function mediaCard(m: Media, onSelect?: (m: Media) => void) {
   card.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     menu(e.clientX, e.clientY, [
-      { label: "Append to timeline", action: () => act.placeMedia(m, store.duration) },
-      { label: "Insert at playhead", action: () => act.placeMedia(m, store.playhead) },
+      { label: "Thêm vào cuối timeline", action: () => act.placeMedia(m, store.duration) },
+      { label: "Chèn tại đầu phát", action: () => act.placeMedia(m, store.playhead) },
       { sep: true },
-      ...(m.kind === "video" ? [{ label: m.proxy ? "Regenerate optimized media" : "Generate optimized media", action: () => { if (m.proxy) store.mutate("unproxy", () => { delete m.proxy; }); void makeProxy(m); } }] : []),
-      ...(m.kind !== "image" ? [{ label: "Transcribe (Whisper)", action: () => transcribe(m, true).catch((err) => store.error("transcribe", String(err))) },
-        { label: "Auto captions on timeline", action: () => act.captionsFor(m.id).then((n) => store.emit("toast", `${n} captions`)).catch((err) => store.error("captions", String(err))) }] : []),
-      { label: "Reveal in Explorer", action: () => fs.reveal(store.abs(m.path)) },
+      ...(m.kind === "video" ? [{ label: m.proxy ? "Tạo lại media tối ưu" : "Tạo media tối ưu", action: () => { if (m.proxy) store.mutate("unproxy", () => { delete m.proxy; }); void makeProxy(m); } }] : []),
+      ...(m.kind !== "image" ? [{ label: "Tạo lời thoại (Whisper)", action: () => transcribe(m, true).catch((err) => store.error("transcribe", String(err))) },
+        { label: "Phụ đề tự động lên timeline", action: () => act.captionsFor(m.id).then((n) => store.emit("toast", `${n} phụ đề`)).catch((err) => store.error("captions", String(err))) }] : []),
+      { label: "Hiện trong Explorer", action: () => fs.reveal(store.abs(m.path)) },
       { sep: true },
-      { label: "Remove from pool", action: () => store.mutate("remove media", (p) => { p.media = p.media.filter((x) => x.id !== m.id); p.clips = p.clips.filter((c) => !(c.source.type === "media" && (c.source as any).media === m.id)); }) },
+      { label: "Xóa khỏi kho media", action: () => store.mutate("remove media", (p) => { p.media = p.media.filter((x) => x.id !== m.id); p.clips = p.clips.filter((c) => !(c.source.type === "media" && (c.source as any).media === m.id)); }) },
     ]);
   });
   return card;
@@ -87,7 +87,7 @@ export class Library {
 
   private renderTabs() {
     clear(this.tabs);
-    for (const [id, label] of [["media", "Media"], ["effects", "Effects"], ["transcript", "Transcript"]]) {
+    for (const [id, label] of [["media", "Media"], ["effects", "Hiệu ứng"], ["transcript", "Lời thoại"]]) {
       this.tabs.appendChild(h("button", { class: this.tab === id ? "on" : "", onclick: () => { this.tab = id; this.renderTabs(); } }, label));
     }
     this.render();
@@ -103,25 +103,25 @@ export class Library {
   private renderMedia() {
     const p = store.project;
     const bar = h("div", { class: "row", style: { padding: "8px 10px 0" } },
-      h("button", { class: "btn sm primary", onclick: () => pickAndImport() }, I.import(), "Import"),
+      h("button", { class: "btn sm primary", onclick: () => pickAndImport() }, I.import(), "Nhập"),
       h("div", { class: "grow" }),
-      h("span", { class: "faint" }, `${p.media.length} items`));
+      h("span", { class: "faint" }, `${p.media.length} mục`));
     this.body.appendChild(bar);
     if (!p.media.length) {
-      this.body.appendChild(h("div", { class: "empty", style: { height: "auto", paddingTop: "40px" } }, h("div", {}, h("b", {}, "No media yet"), "Drop files here from Explorer,", h("br"), "or ask the agent to generate clips.")));
+      this.body.appendChild(h("div", { class: "empty", style: { height: "auto", paddingTop: "40px" } }, h("div", {}, h("b", {}, "Chưa có media"), "Kéo thả tệp từ Explorer vào đây,", h("br"), "hoặc nhờ agent tạo clip.")));
       return;
     }
     const grid = h("div", { class: "pool", style: { gridTemplateColumns: "repeat(auto-fill,minmax(120px,1fr))" } });
     for (const m of p.media) {
       const c = mediaCard(m);
-      if (needsProxy(m) && !proxying.has(m.id)) c.querySelector(".badge")!.textContent = m.kind + " · needs opt";
+      if (needsProxy(m) && !proxying.has(m.id)) c.querySelector(".badge")!.textContent = m.kind + " · cần tối ưu";
       grid.appendChild(c);
     }
     this.body.appendChild(grid);
   }
 
   private async renderEffects() {
-    const q = h("input", { type: "search", placeholder: "Search effects, transitions, titles…", value: this.query });
+    const q = h("input", { type: "search", placeholder: "Tìm hiệu ứng, chuyển cảnh, tiêu đề…", value: this.query });
     q.addEventListener("input", () => { this.query = q.value.toLowerCase(); void this.renderEffectsList(list); });
     const list = h("div");
     this.body.append(h("div", { class: "search" }, q), list);
@@ -133,7 +133,7 @@ export class Library {
     const ok = (s: string) => !this.query || s.toLowerCase().includes(this.query);
     const item = (name: string, sub: string, swatch: string, data: [string, string], onClick?: () => void) => {
       if (!ok(name + " " + sub)) return null;
-      const el = h("div", { class: "lib-item", draggable: true, title: "Drag onto the timeline / a clip, or double-click" },
+      const el = h("div", { class: "lib-item", draggable: true, title: "Kéo vào timeline / một clip, hoặc nhấp đúp" },
         h("div", { class: "sw", style: { background: swatch } }), h("div", { class: "t" }, h("div", {}, name), h("small", {}, sub)));
       el.addEventListener("dragstart", (e) => { e.dataTransfer!.setData(data[0], data[1]); (window as any).__dragDur = "5"; });
       if (onClick) el.addEventListener("dblclick", onClick);
@@ -141,16 +141,16 @@ export class Library {
     };
     const sec = (t: string, items: (HTMLElement | null)[]) => { const xs = items.filter(Boolean) as HTMLElement[]; if (xs.length) list.append(h("div", { class: "lib-sec" }, t), ...xs); };
 
-    sec("Generators", [
-      item("Text", "Animated title", "linear-gradient(135deg,#d4730f,#7a3e00)", ["shdw/gen", JSON.stringify({ name: "Text", duration: 4, source: { type: "text", text: "Title", font: "Inter", size: 140, weight: 700, color: "#ffffff", tracking: -0.025, animation: "fadeUp" } })], () => act.addText()),
-      item("Solid Color", "Color matte", "#3a3a40", ["shdw/gen", JSON.stringify({ name: "Solid", source: { type: "solid", color: "#1c1c1e" } })], () => act.addSolid()),
-      item("Gradient", "Linear / radial", "linear-gradient(135deg,#0b0b2a,#5e3bff,#ff7aa8)", ["shdw/gen", JSON.stringify({ name: "Gradient", source: { type: "gradient", colors: ["#0b0b2a", "#5e3bff", "#ff7aa8"], angle: 135 } })], () => act.addGradient()),
-      item("Adjustment Layer", "Effects & grade for layers below", "repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)", ["shdw/gen", JSON.stringify({ name: "Adjustment", source: { type: "adjustment" } })], () => act.addAdjustment()),
+    sec("Trình tạo", [
+      item("Chữ", "Tiêu đề động", "linear-gradient(135deg,#d4730f,#7a3e00)", ["shdw/gen", JSON.stringify({ name: "Text", duration: 4, source: { type: "text", text: "Title", font: "Inter", size: 140, weight: 700, color: "#ffffff", tracking: -0.025, animation: "fadeUp" } })], () => act.addText()),
+      item("Màu đơn", "Nền màu", "#3a3a40", ["shdw/gen", JSON.stringify({ name: "Solid", source: { type: "solid", color: "#1c1c1e" } })], () => act.addSolid()),
+      item("Gradient", "Tuyến tính / tỏa tròn", "linear-gradient(135deg,#0b0b2a,#5e3bff,#ff7aa8)", ["shdw/gen", JSON.stringify({ name: "Gradient", source: { type: "gradient", colors: ["#0b0b2a", "#5e3bff", "#ff7aa8"], angle: 135 } })], () => act.addGradient()),
+      item("Lớp điều chỉnh", "Hiệu ứng & chỉnh màu cho các lớp bên dưới", "repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)", ["shdw/gen", JSON.stringify({ name: "Adjustment", source: { type: "adjustment" } })], () => act.addAdjustment()),
     ]);
     for (const cat of TEMPLATE_CATEGORIES) {
       sec(`Motion · ${cat}`, TEMPLATES.filter((t) => t.category === cat).map((t) => {
         const ext2 = t.kind === "html" ? "html" : "js";
-        const el = item(t.name, `${t.duration}s ${t.kind === "html" ? "HTML/GSAP" : "canvas"} template`, t.preview, ["shdw/gen", JSON.stringify({ name: t.name, duration: t.duration, source: { type: t.kind === "html" ? "html" : "motion", module: `motion/${t.id}.${ext2}`, params: {} } })],
+        const el = item(t.name, `${t.duration}s ${t.kind === "html" ? "HTML/GSAP" : "canvas"} mẫu`, t.preview, ["shdw/gen", JSON.stringify({ name: t.name, duration: t.duration, source: { type: t.kind === "html" ? "html" : "motion", module: `motion/${t.id}.${ext2}`, params: {} } })],
           async () => { const rel = await materializeTemplate(t.id); act.addMotion(rel, t.name, t.duration); });
         el?.addEventListener("dragstart", () => void materializeTemplate(t.id));
         return el;
@@ -158,20 +158,20 @@ export class Library {
     }
     const own = await listModules("motion");
     const htmls = await listHtml();
-    sec("Project HTML compositions (motion/*.html)", htmls.filter((p) => !TEMPLATES.some((t) => `motion/${t.id}.html` === p)).map((p) =>
+    sec("Bố cục HTML của dự án (motion/*.html)", htmls.filter((p) => !TEMPLATES.some((t) => `motion/${t.id}.html` === p)).map((p) =>
       item(p.split("/").pop()!, "HTML · GSAP / CSS / SVG", "linear-gradient(135deg,#ff9f0a,#ff375f)", ["shdw/gen", JSON.stringify({ name: p.split("/").pop(), duration: 5, source: { type: "html", module: p, params: {} } })],
         () => act.addMotion(p, p.split("/").pop()!, 5))));
-    sec("Project motion (motion/)", own.filter((p) => !TEMPLATES.some((t) => `motion/${t.id}.js` === p)).map((p) => {
+    sec("Motion của dự án (motion/)", own.filter((p) => !TEMPLATES.some((t) => `motion/${t.id}.js` === p)).map((p) => {
       const mod = getModule(p);
       return item(mod?.name ?? p.split("/").pop()!, p, "linear-gradient(135deg,#8e44e8,#3b1066)", ["shdw/gen", JSON.stringify({ name: mod?.name ?? p, duration: mod?.duration ?? 4, source: { type: "motion", module: p, params: {} } })],
         () => act.addMotion(p, mod?.name ?? p, mod?.duration ?? 4));
     }));
-    sec("Video Transitions", Object.entries(TRANSITIONS).map(([k, v]) => item(v.name, "drag onto a clip's head", "linear-gradient(90deg,#3a5bd9,#111)", ["shdw/transition", k])));
+    sec("Chuyển cảnh video", Object.entries(TRANSITIONS).map(([k, v]) => item(v.name, "kéo vào đầu clip", "linear-gradient(90deg,#3a5bd9,#111)", ["shdw/transition", k])));
     const ctr = await listModules("transitions");
-    sec("Custom Transitions (transitions/)", ctr.map((p) => item(getModule(p)?.name ?? p.split("/").pop()!, p, "linear-gradient(90deg,#8e44e8,#111)", ["shdw/transition", p])));
-    sec("Effects", Object.entries(EFFECTS).map(([k, v]) => item(v.name, "drag onto a clip", "linear-gradient(135deg,#2c2c34,#55556a)", ["shdw/effect", k])));
+    sec("Chuyển cảnh tùy chỉnh (transitions/)", ctr.map((p) => item(getModule(p)?.name ?? p.split("/").pop()!, p, "linear-gradient(90deg,#8e44e8,#111)", ["shdw/transition", p])));
+    sec("Hiệu ứng", Object.entries(EFFECTS).map(([k, v]) => item(v.name, "kéo vào một clip", "linear-gradient(135deg,#2c2c34,#55556a)", ["shdw/effect", k])));
     const cfx = await listModules("effects");
-    sec("Custom Effects (effects/)", cfx.map((p) => item(getModule(p)?.name ?? p.split("/").pop()!, p, "linear-gradient(135deg,#8e44e8,#2c2c34)", ["shdw/effect", p])));
+    sec("Hiệu ứng tùy chỉnh (effects/)", cfx.map((p) => item(getModule(p)?.name ?? p.split("/").pop()!, p, "linear-gradient(135deg,#8e44e8,#2c2c34)", ["shdw/effect", p])));
   }
 
   // ---------- transcript ----------
@@ -189,20 +189,20 @@ export class Library {
     const status = h("span", { class: "faint" });
     const go = h("button", { class: "btn sm primary", onclick: async () => {
       if (!m) return;
-      go.disabled = true; status.textContent = "Transcribing… (first run downloads the model)";
+      go.disabled = true; status.textContent = "Đang tạo lời thoại… (lần đầu sẽ tải model)";
       try { await transcribe(m, true); } catch (e: any) { store.error("transcribe", String(e)); }
       this.render();
-    } }, I.caption(), "Transcribe");
+    } }, I.caption(), "Tạo lời thoại");
     this.body.append(h("div", { class: "row", style: { padding: "8px 10px" } }, pick, go), h("div", { style: { padding: "0 12px" } }, status));
-    if (!m) { this.body.appendChild(h("div", { class: "empty" }, "Import video or audio to transcribe.")); return; }
+    if (!m) { this.body.appendChild(h("div", { class: "empty" }, "Nhập video hoặc audio để tạo lời thoại.")); return; }
     const file = join(store.dir, "transcripts", m.id + ".json");
-    if (!(await fs.exists(file))) { this.body.appendChild(h("div", { class: "empty", style: { height: "auto", padding: "30px" } }, h("div", {}, h("b", {}, "No transcript yet"), "Runs Whisper locally via FFmpeg."))); return; }
+    if (!(await fs.exists(file))) { this.body.appendChild(h("div", { class: "empty", style: { height: "auto", padding: "30px" } }, h("div", {}, h("b", {}, "Chưa có lời thoại"), "Chạy Whisper cục bộ qua FFmpeg."))); return; }
     this.segs = JSON.parse(await fs.readText(file)).segments ?? [];
     const selected = new Set<number>();
     const tools = h("div", { class: "row", style: { padding: "0 10px 6px", flexWrap: "wrap" } },
-      h("button", { class: "btn sm", onclick: () => act.captionsFor(m.id).then((n) => store.emit("toast", `${n} captions added`)) }, "Captions → timeline"),
-      h("button", { class: "btn sm danger", title: "Ripple-delete the selected (struck-through) segments from every clip of this media", onclick: () => this.cutSegments(m.id, [...selected].map((i) => this.segs[i])) }, "Cut selected"),
-      h("button", { class: "btn sm", onclick: () => store.emit("agent-prompt", `Using transcripts/${m.id}.json, cut ${m.name} down to the best moments: remove filler words, long pauses and repeated takes. Keep it tight.`) }, I.spark(), "AI cut"));
+      h("button", { class: "btn sm", onclick: () => act.captionsFor(m.id).then((n) => store.emit("toast", `Đã thêm ${n} phụ đề`)) }, "Phụ đề → timeline"),
+      h("button", { class: "btn sm danger", title: "Xóa dồn (ripple) các đoạn đã chọn (gạch ngang) khỏi mọi clip của media này", onclick: () => this.cutSegments(m.id, [...selected].map((i) => this.segs[i])) }, "Cắt đoạn đã chọn"),
+      h("button", { class: "btn sm", onclick: () => store.emit("agent-prompt", `Using transcripts/${m.id}.json, cut ${m.name} down to the best moments: remove filler words, long pauses and repeated takes. Keep it tight.`) }, I.spark(), "Cắt bằng AI"));
     const tx = h("div", { class: "tx" });
     this.segEls = this.segs.map((s, i) => {
       const el = h("div", { class: "seg" }, h("time", {}, fmtTime(s.start)), h("span", {}, s.text));
@@ -214,7 +214,7 @@ export class Library {
       tx.appendChild(el);
       return el;
     });
-    this.body.append(tools, h("div", { class: "faint", style: { padding: "0 12px", fontSize: "11px" } }, "Click to jump · Ctrl+click to mark for cutting"), tx);
+    this.body.append(tools, h("div", { class: "faint", style: { padding: "0 12px", fontSize: "11px" } }, "Nhấp để nhảy tới · Ctrl+nhấp để đánh dấu cắt"), tx);
   }
 
   private highlightTx() {
@@ -237,7 +237,7 @@ export class Library {
     }
     ranges.sort((x, y) => y[0] - x[0]);
     for (const [a, b] of ranges) act.rippleDeleteRange(a, b);
-    store.emit("toast", `Removed ${ranges.length} ranges`);
+    store.emit("toast", `Đã xóa ${ranges.length} đoạn`);
   }
 }
 

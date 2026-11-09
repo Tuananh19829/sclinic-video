@@ -14,7 +14,7 @@ export function addTrack(kind: TrackKind, ref?: string, above = true) {
     const prefix = kind === "video" ? "V" : kind === "audio" ? "A" : "S";
     let id = `${prefix}${n}`;
     while (p.tracks.some((t) => t.id === id)) id += "'";
-    const t: Track = { id, kind, name: kind === "subtitle" ? `Subtitles ${n}` : id, volume: 1, pan: 0 };
+    const t: Track = { id, kind, name: kind === "subtitle" ? `Phụ đề ${n}` : id, volume: 1, pan: 0 };
     if (kind === "subtitle") t.style = { font: "Inter", size: 54, weight: 600, color: "#ffffff", y: 0.88, background: { color: "rgba(0,0,0,0.55)", padding: 14, radius: 10 } };
     const refIdx = ref ? p.tracks.findIndex((x) => x.id === ref && x.kind === kind) : -1;
     // array order = bottom-up for video; "above" in the UI means later in the array for video/subtitle, earlier for audio
@@ -92,11 +92,11 @@ export function addGenerated(source: Source, name: string, duration = 5, start =
   return clip;
 }
 
-export const addText = (text = "Title") =>
-  addGenerated({ type: "text", text, font: "Inter", size: 140, weight: 700, color: "#ffffff", align: "center", tracking: -0.025, animation: "fadeUp" } as any, "Text", 4);
-export const addSolid = (color = "#1c1c1e") => addGenerated({ type: "solid", color }, "Solid Color", 5);
-export const addGradient = () => addGenerated({ type: "gradient", colors: ["#0b0b2a", "#5e3bff", "#ff7aa8"], angle: 135 }, "Gradient", 5);
-export const addAdjustment = () => addGenerated({ type: "adjustment" }, "Adjustment Layer", 5);
+export const addText = (text = "Tiêu đề") =>
+  addGenerated({ type: "text", text, font: "Inter", size: 140, weight: 700, color: "#ffffff", align: "center", tracking: -0.025, animation: "fadeUp" } as any, "Chữ", 4);
+export const addSolid = (color = "#1c1c1e") => addGenerated({ type: "solid", color }, "Màu đơn", 5);
+export const addGradient = () => addGenerated({ type: "gradient", colors: ["#0b0b2a", "#5e3bff", "#ff7aa8"], angle: 135 }, "Dải màu", 5);
+export const addAdjustment = () => addGenerated({ type: "adjustment" }, "Lớp điều chỉnh", 5);
 export const addMotion = (module: string, name: string, duration = 4, params: any = {}) =>
   addGenerated({ type: /\.html?$/i.test(module) ? "html" : "motion", module, params } as any, name, duration);
 
@@ -218,7 +218,7 @@ export function toggleEnabled() {
   store.mutate("enable", () => { for (const c of store.selectedClips()) c.enabled = c.enabled === false; });
 }
 
-export function addMarker(t = store.playhead, name = "Marker") {
+export function addMarker(t = store.playhead, name = "Điểm đánh dấu") {
   store.mutate("marker", (p) => p.markers.push({ t, name, color: "#5e8bff" }));
 }
 
@@ -242,7 +242,7 @@ export function transitionAtPlayhead(type = "crossDissolve") {
     if (dist < d) { d = dist; best = c; }
   }
   if (best) setTransition(best.id, type);
-  else store.emit("toast", "No cut near playhead");
+  else store.emit("toast", "Không có điểm cắt gần đầu phát");
 }
 
 export function closeGaps(trackId?: string) {
@@ -272,7 +272,7 @@ export async function captionsFor(mediaId: string, trackId?: string) {
         const b = c.start + (Math.min(s.end, sout) - sin) / sp;
         if (b - a < 0.05) continue;
         p.clips = p.clips.filter((x) => !(x.track === track && x.start < b && clipEnd(x) > a));
-        p.clips.push({ id: uid("c"), track, start: a, duration: b - a, name: "Caption", source: { type: "subtitle", text: s.text } });
+        p.clips.push({ id: uid("c"), track, start: a, duration: b - a, name: "Phụ đề", source: { type: "subtitle", text: s.text } });
         count++;
       }
     }

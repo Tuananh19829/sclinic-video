@@ -60,7 +60,7 @@ export class Inspector {
 
   constructor() {
     this.body = h("div", { class: "body insp" });
-    this.el = h("div", { class: "panel" }, h("header", {}, h("h3", {}, "Inspector"), h("div", { class: "grow" })), this.body);
+    this.el = h("div", { class: "panel" }, h("header", {}, h("h3", {}, "Thuộc tính"), h("div", { class: "grow" })), this.body);
     store.on("selection", () => this.render());
     store.on("project", (why) => { if (why === "drag" || why === "trim" || why === "inspector") { this.refresh(); return; } this.render(); });
     store.on("time", () => this.refresh());
@@ -90,67 +90,67 @@ export class Inspector {
 
     // clip
     this.body.append(group("Clip", [
-      this.textField("Name", c.name ?? "", (v) => this.commit(() => { c.name = v; })),
-      this.numBase(c, "Start", "start", 0, 36000, 1 / store.fps),
-      this.numBase(c, "Duration", "duration", 1 / store.fps, 36000, 1 / store.fps),
-      ...(src.type === "media" && m?.kind !== "image" ? [this.numBase(c, "Speed", "speed", 0.1, 16, 0.05, 1, (v) => {
+      this.textField("Tên", c.name ?? "", (v) => this.commit(() => { c.name = v; })),
+      this.numBase(c, "Bắt đầu", "start", 0, 36000, 1 / store.fps),
+      this.numBase(c, "Thời lượng", "duration", 1 / store.fps, 36000, 1 / store.fps),
+      ...(src.type === "media" && m?.kind !== "image" ? [this.numBase(c, "Tốc độ", "speed", 0.1, 16, 0.05, 1, (v) => {
         const old = c.speed ?? 1; c.duration = (c.duration * old) / v; c.speed = v;
       })] : []),
-      this.fieldRow("Enabled", switchEl(c.enabled !== false, (v) => this.commit(() => { c.enabled = v; }))),
+      this.fieldRow("Bật", switchEl(c.enabled !== false, (v) => this.commit(() => { c.enabled = v; }))),
     ]));
 
     if (!isAudio && src.type !== "adjustment") {
-      this.body.append(group("Transform", [
-        this.num(c, "Position X", "transform.x", -4000, 4000, 1, 0),
-        this.num(c, "Position Y", "transform.y", -4000, 4000, 1, 0),
-        this.num(c, "Zoom", "transform.scale", 0, 8, 0.01, 1),
-        this.num(c, "Scale X", "transform.scaleX", 0, 8, 0.01, 1),
-        this.num(c, "Scale Y", "transform.scaleY", 0, 8, 0.01, 1),
-        this.num(c, "Rotation", "transform.rotation", -720, 720, 0.1, 0),
-        this.num(c, "Anchor X", "transform.anchorX", -1, 2, 0.01, 0.5),
-        this.num(c, "Anchor Y", "transform.anchorY", -1, 2, 0.01, 0.5),
-        this.fieldRow("Flip", h("div", { class: "row" },
-          h("button", { class: "btn sm" + (c.transform?.flipH ? " on" : ""), onclick: () => this.commit(() => { (c.transform ??= {}).flipH = !c.transform.flipH; }) }, "Horizontal"),
-          h("button", { class: "btn sm" + (c.transform?.flipV ? " on" : ""), onclick: () => this.commit(() => { (c.transform ??= {}).flipV = !c.transform.flipV; }) }, "Vertical"))),
+      this.body.append(group("Biến đổi", [
+        this.num(c, "Vị trí X", "transform.x", -4000, 4000, 1, 0),
+        this.num(c, "Vị trí Y", "transform.y", -4000, 4000, 1, 0),
+        this.num(c, "Thu phóng", "transform.scale", 0, 8, 0.01, 1),
+        this.num(c, "Tỷ lệ X", "transform.scaleX", 0, 8, 0.01, 1),
+        this.num(c, "Tỷ lệ Y", "transform.scaleY", 0, 8, 0.01, 1),
+        this.num(c, "Xoay", "transform.rotation", -720, 720, 0.1, 0),
+        this.num(c, "Điểm neo X", "transform.anchorX", -1, 2, 0.01, 0.5),
+        this.num(c, "Điểm neo Y", "transform.anchorY", -1, 2, 0.01, 0.5),
+        this.fieldRow("Lật", h("div", { class: "row" },
+          h("button", { class: "btn sm" + (c.transform?.flipH ? " on" : ""), onclick: () => this.commit(() => { (c.transform ??= {}).flipH = !c.transform.flipH; }) }, "Ngang"),
+          h("button", { class: "btn sm" + (c.transform?.flipV ? " on" : ""), onclick: () => this.commit(() => { (c.transform ??= {}).flipV = !c.transform.flipV; }) }, "Dọc"))),
       ]));
-      this.body.append(group("Cropping", [
-        this.num(c, "Left", "transform.cropLeft", 0, 1, 0.005, 0), this.num(c, "Right", "transform.cropRight", 0, 1, 0.005, 0),
-        this.num(c, "Top", "transform.cropTop", 0, 1, 0.005, 0), this.num(c, "Bottom", "transform.cropBottom", 0, 1, 0.005, 0),
+      this.body.append(group("Cắt khung", [
+        this.num(c, "Trái", "transform.cropLeft", 0, 1, 0.005, 0), this.num(c, "Phải", "transform.cropRight", 0, 1, 0.005, 0),
+        this.num(c, "Trên", "transform.cropTop", 0, 1, 0.005, 0), this.num(c, "Dưới", "transform.cropBottom", 0, 1, 0.005, 0),
       ], true));
-      this.body.append(group("Composite", [
-        this.num(c, "Opacity", "opacity", 0, 1, 0.01, 1),
+      this.body.append(group("Tổng hợp", [
+        this.num(c, "Độ đục", "opacity", 0, 1, 0.01, 1),
         this.blendSelect(c),
-        this.numBase(c, "Fade in", "fadeIn", 0, 30, 0.05, 0),
-        this.numBase(c, "Fade out", "fadeOut", 0, 30, 0.05, 0),
+        this.numBase(c, "Hiện dần", "fadeIn", 0, 30, 0.05, 0),
+        this.numBase(c, "Mờ dần", "fadeOut", 0, 30, 0.05, 0),
       ]));
     }
 
     if (isAudio || (src.type === "media" && m?.kind === "audio")) {
-      this.body.append(group("Audio", [
-        this.num(c, "Volume", "volume", 0, 2, 0.01, 1),
-        this.numBase(c, "Pan", "pan", -1, 1, 0.01, 0),
-        this.numBase(c, "Fade in", "audioFadeIn", 0, 30, 0.05, 0),
-        this.numBase(c, "Fade out", "audioFadeOut", 0, 30, 0.05, 0),
+      this.body.append(group("Âm thanh", [
+        this.num(c, "Âm lượng", "volume", 0, 2, 0.01, 1),
+        this.numBase(c, "Cân bằng", "pan", -1, 1, 0.01, 0),
+        this.numBase(c, "Hiện dần", "audioFadeIn", 0, 30, 0.05, 0),
+        this.numBase(c, "Mờ dần", "audioFadeOut", 0, 30, 0.05, 0),
       ]));
     }
 
     // source specific
-    if (src.type === "text") this.body.append(group("Text", this.textControls(c)));
-    if (src.type === "subtitle") this.body.append(group("Subtitle", [this.area(src.text, (v) => this.commit(() => { src.text = v; }))]));
-    if (src.type === "solid") this.body.append(group("Color", [this.fieldRow("Color", this.color(src.color, (v) => this.commit(() => { src.color = v; })))]));
-    if (src.type === "gradient") this.body.append(group("Gradient", [
-      ...src.colors.map((col: string, i: number) => this.fieldRow(`Stop ${i + 1}`, h("div", { class: "row" }, this.color(col, (v) => this.commit(() => { src.colors[i] = v; })),
+    if (src.type === "text") this.body.append(group("Chữ", this.textControls(c)));
+    if (src.type === "subtitle") this.body.append(group("Phụ đề", [this.area(src.text, (v) => this.commit(() => { src.text = v; }))]));
+    if (src.type === "solid") this.body.append(group("Màu", [this.fieldRow("Màu", this.color(src.color, (v) => this.commit(() => { src.color = v; })))]));
+    if (src.type === "gradient") this.body.append(group("Dải màu", [
+      ...src.colors.map((col: string, i: number) => this.fieldRow(`Điểm ${i + 1}`, h("div", { class: "row" }, this.color(col, (v) => this.commit(() => { src.colors[i] = v; })),
         src.colors.length > 2 ? h("button", { class: "btn icon sm ghost", onclick: () => this.commit(() => src.colors.splice(i, 1)) }, I.minus()) : null))),
-      h("button", { class: "btn sm", onclick: () => this.commit(() => src.colors.push("#ffffff")) }, "Add stop"),
-      this.num(c, "Angle", "params.angle", 0, 360, 1, 135),
-      this.fieldRow("Radial", switchEl(!!src.radial, (v) => this.commit(() => { src.radial = v; }))),
+      h("button", { class: "btn sm", onclick: () => this.commit(() => src.colors.push("#ffffff")) }, "Thêm điểm"),
+      this.num(c, "Góc", "params.angle", 0, 360, 1, 135),
+      this.fieldRow("Toả tròn", switchEl(!!src.radial, (v) => this.commit(() => { src.radial = v; }))),
     ]));
-    if (src.type === "motion") this.body.append(group("Motion Graphic", this.motionControls(c), false,
-      h("button", { class: "btn sm", onclick: () => store.emit("open-motion", c.id) }, I.code(), "Code")));
+    if (src.type === "motion") this.body.append(group("Đồ hoạ chuyển động", this.motionControls(c), false,
+      h("button", { class: "btn sm", onclick: () => store.emit("open-motion", c.id) }, I.code(), "Mã")));
 
     // effects
-    if (!isAudio) this.body.append(group("Effects", this.effectControls(c), false));
-    if (!isAudio && src.type !== "adjustment") this.body.append(group("Transition In", this.transitionControls(c), !c.transition));
+    if (!isAudio) this.body.append(group("Hiệu ứng", this.effectControls(c), false));
+    if (!isAudio && src.type !== "adjustment") this.body.append(group("Chuyển cảnh vào", this.transitionControls(c), !c.transition));
   }
 
   private commit(fn: () => void) { store.mutate("inspector-struct", fn); }
@@ -210,7 +210,7 @@ export class Inspector {
     fill([]);
     void listModules("blends").then(fill);
     sel.addEventListener("change", () => this.commit(() => { c.blend = sel.value; }));
-    return this.fieldRow("Blend", sel);
+    return this.fieldRow("Hoà trộn", sel);
   }
 
   private textControls(c: Clip): HTMLElement[] {
@@ -228,20 +228,20 @@ export class Inspector {
     weight.addEventListener("change", () => this.commit(() => { s.weight = +weight.value; }));
     return [
       this.area(s.text, (v) => this.commit(() => { s.text = v; })),
-      this.fieldRow("Font", fonts),
-      this.fieldRow("Weight", weight),
-      this.num(c, "Size", "params.size", 6, 800, 1, 96),
-      this.num(c, "Tracking", "params.tracking", -0.2, 1, 0.005, 0),
-      this.numBaseSrc(s, "Line height", "lineHeight", 0.6, 3, 0.01, 1.15),
-      this.fieldRow("Color", this.color(s.color ?? "#ffffff", (v) => this.commit(() => { s.color = v; }))),
-      this.fieldRow("Align", align),
-      this.fieldRow("Animation", anim),
-      this.numBaseSrc(s, "Anim time", "animDuration", 0.05, 5, 0.05, 0.6),
-      this.fieldRow("Stroke", h("div", { class: "row" }, this.color(s.stroke?.color ?? "#000000", (v) => this.commit(() => { s.stroke = { width: s.stroke?.width ?? 4, color: v }; })),
+      this.fieldRow("Phông chữ", fonts),
+      this.fieldRow("Độ đậm", weight),
+      this.num(c, "Cỡ chữ", "params.size", 6, 800, 1, 96),
+      this.num(c, "Giãn chữ", "params.tracking", -0.2, 1, 0.005, 0),
+      this.numBaseSrc(s, "Giãn dòng", "lineHeight", 0.6, 3, 0.01, 1.15),
+      this.fieldRow("Màu", this.color(s.color ?? "#ffffff", (v) => this.commit(() => { s.color = v; }))),
+      this.fieldRow("Căn lề", align),
+      this.fieldRow("Hoạt ảnh", anim),
+      this.numBaseSrc(s, "TG hoạt ảnh", "animDuration", 0.05, 5, 0.05, 0.6),
+      this.fieldRow("Viền", h("div", { class: "row" }, this.color(s.stroke?.color ?? "#000000", (v) => this.commit(() => { s.stroke = { width: s.stroke?.width ?? 4, color: v }; })),
         h("input", { type: "number", value: s.stroke?.width ?? 0, min: 0, max: 60, style: { width: "56px" }, onchange: (e: any) => this.commit(() => { const w = +e.target.value; s.stroke = w ? { color: s.stroke?.color ?? "#000", width: w } : undefined; }) }))),
-      this.fieldRow("Shadow", h("div", { class: "row" }, this.color(s.shadow?.color ?? "#000000", (v) => this.commit(() => { s.shadow = { blur: s.shadow?.blur ?? 20, color: v, y: 6 }; })),
+      this.fieldRow("Đổ bóng", h("div", { class: "row" }, this.color(s.shadow?.color ?? "#000000", (v) => this.commit(() => { s.shadow = { blur: s.shadow?.blur ?? 20, color: v, y: 6 }; })),
         h("input", { type: "number", value: s.shadow?.blur ?? 0, min: 0, max: 200, style: { width: "56px" }, onchange: (e: any) => this.commit(() => { const b = +e.target.value; s.shadow = b ? { color: s.shadow?.color ?? "rgba(0,0,0,0.6)", blur: b, y: 6 } : undefined; }) }))),
-      this.fieldRow("Background", h("div", { class: "row" }, switchEl(!!s.background, (v) => this.commit(() => { s.background = v ? { color: "rgba(0,0,0,0.6)", padding: 24, radius: 16 } : undefined; })),
+      this.fieldRow("Nền", h("div", { class: "row" }, switchEl(!!s.background, (v) => this.commit(() => { s.background = v ? { color: "rgba(0,0,0,0.6)", padding: 24, radius: 16 } : undefined; })),
         s.background ? this.color(s.background.color, (v) => this.commit(() => { s.background.color = v; })) : null)),
     ];
   }
@@ -253,12 +253,12 @@ export class Inspector {
   private motionControls(c: Clip): HTMLElement[] {
     const s: any = c.source;
     const mod = getModule(s.module);
-    if (!mod) return [h("div", { class: "faint" }, `Loading ${s.module}…`)];
+    if (!mod) return [h("div", { class: "faint" }, `Đang tải ${s.module}…`)];
     const out: HTMLElement[] = [];
     const specs = mod.params ?? {};
     const vals = { ...defaultsOf(specs), ...(s.params ?? {}) };
     for (const [k, spec] of Object.entries(specs)) out.push(this.paramControl(c, `params.${k}`, k, spec, vals[k]));
-    if (!out.length) out.push(h("div", { class: "faint" }, "This module has no parameters."));
+    if (!out.length) out.push(h("div", { class: "faint" }, "Module này không có tham số."));
     return out;
   }
 
@@ -287,13 +287,13 @@ export class Inspector {
       const card = h("div", { class: "fxcard" },
         h("div", { class: "fxh" }, switchEl(e.enabled !== false, (v) => this.commit(() => { e.enabled = v; })),
           h("span", { class: "grow" }, builtin?.name ?? mod?.name ?? e.type),
-          i > 0 ? h("button", { class: "btn icon sm ghost", title: "Move up", onclick: () => this.commit(() => { const a = c.effects!; [a[i - 1], a[i]] = [a[i], a[i - 1]]; }) }, "↑") : null,
-          h("button", { class: "btn icon sm ghost", title: "Remove", onclick: () => this.commit(() => { c.effects!.splice(i, 1); }) }, I.x())),
+          i > 0 ? h("button", { class: "btn icon sm ghost", title: "Đưa lên", onclick: () => this.commit(() => { const a = c.effects!; [a[i - 1], a[i]] = [a[i], a[i - 1]]; }) }, "↑") : null,
+          h("button", { class: "btn icon sm ghost", title: "Gỡ bỏ", onclick: () => this.commit(() => { c.effects!.splice(i, 1); }) }, I.x())),
         ...Object.entries(specs).map(([k, sp]) => this.paramControl(c, `effects.${i}.${k}`, k, sp, e.params?.[k] ?? sp.default)));
       out.push(card);
     });
     const add = h("select") as HTMLSelectElement;
-    add.appendChild(h("option", { value: "" }, "+ Add effect…"));
+    add.appendChild(h("option", { value: "" }, "+ Thêm hiệu ứng…"));
     for (const [k, v] of Object.entries(EFFECTS)) add.appendChild(h("option", { value: k }, v.name));
     void listModules("effects").then((fx) => fx.forEach((f) => add.appendChild(h("option", { value: f }, "✦ " + f.split("/").pop()))));
     add.addEventListener("change", () => {
@@ -308,16 +308,16 @@ export class Inspector {
 
   private transitionControls(c: Clip): HTMLElement[] {
     const sel = h("select") as HTMLSelectElement;
-    sel.appendChild(h("option", { value: "" }, "None"));
+    sel.appendChild(h("option", { value: "" }, "Không"));
     for (const n of TRANSITION_NAMES) sel.appendChild(h("option", { value: n, selected: c.transition?.type === n }, TRANSITIONS[n].name));
     void listModules("transitions").then((tr) => tr.forEach((f) => sel.appendChild(h("option", { value: f, selected: c.transition?.type === f }, "✦ " + f.split("/").pop()))));
     sel.addEventListener("change", () => this.commit(() => { c.transition = sel.value ? { type: sel.value, duration: c.transition?.duration ?? 0.6 } : undefined; }));
-    const out = [this.fieldRow("Type", sel)];
+    const out = [this.fieldRow("Loại", sel)];
     if (c.transition) {
       const s = slider(c.transition.duration, 1 / store.fps, Math.max(0.1, Math.min(10, c.duration)), 1 / store.fps, (v) => { c.transition!.duration = v; store.changed("inspector"); }, () => store.begin());
-      out.push(this.fieldRow("Duration", h("div", { class: "row grow" }, s.range, s.num)));
+      out.push(this.fieldRow("Thời lượng", h("div", { class: "row grow" }, s.range, s.num)));
     }
-    out.push(h("div", { class: "faint", style: { fontSize: "11px" } }, "Plays from the clip that ends where this one starts on the same track."));
+    out.push(h("div", { class: "faint", style: { fontSize: "11px" } }, "Chuyển từ clip kết thúc ngay chỗ clip này bắt đầu, trên cùng track."));
     return out;
   }
 
@@ -327,23 +327,23 @@ export class Inspector {
     const s = p.settings;
     const res = h("select") as HTMLSelectElement;
     const presets: [string, number, number][] = [["3840×2160 4K UHD", 3840, 2160], ["2560×1440 QHD", 2560, 1440], ["1920×1080 HD", 1920, 1080], ["1280×720 HD", 1280, 720],
-      ["1080×1920 Vertical", 1080, 1920], ["1080×1350 Portrait 4:5", 1080, 1350], ["1080×1080 Square", 1080, 1080], ["2048×858 Cinema Scope", 2048, 858]];
+      ["1080×1920 Dọc", 1080, 1920], ["1080×1350 Chân dung 4:5", 1080, 1350], ["1080×1080 Vuông", 1080, 1080], ["2048×858 Cinema Scope", 2048, 858]];
     let matched = false;
     for (const [n, w, hh] of presets) { const on = s.width === w && s.height === hh; matched ||= on; res.appendChild(h("option", { value: `${w}x${hh}`, selected: on }, n)); }
-    if (!matched) res.appendChild(h("option", { value: `${s.width}x${s.height}`, selected: true }, `${s.width}×${s.height} Custom`));
+    if (!matched) res.appendChild(h("option", { value: `${s.width}x${s.height}`, selected: true }, `${s.width}×${s.height} Tuỳ chỉnh`));
     res.addEventListener("change", () => { const [w, hh] = res.value.split("x").map(Number); this.commit(() => { s.width = w; s.height = hh; }); });
     const fps = h("select") as HTMLSelectElement;
     for (const f of [23.976, 24, 25, 29.97, 30, 50, 59.94, 60]) fps.appendChild(h("option", { value: f, selected: s.fps === f }, String(f)));
     fps.addEventListener("change", () => this.commit(() => { s.fps = +fps.value; }));
     this.body.append(h("div", { style: { padding: "10px 12px 6px" } },
-      h("div", { style: { font: "600 14px var(--font-display)" } }, p.name), h("div", { class: "faint", style: { fontSize: "11px" } }, "No clip selected — project settings")));
+      h("div", { style: { font: "600 14px var(--font-display)" } }, p.name), h("div", { class: "faint", style: { fontSize: "11px" } }, "Chưa chọn clip — cài đặt dự án")));
     this.body.append(group("Timeline", [
-      this.textField("Name", p.name, (v) => this.commit(() => { p.name = v; })),
-      this.fieldRow("Resolution", res), this.fieldRow("Frame rate", fps),
-      this.fieldRow("Background", this.color(s.background, (v) => this.commit(() => { s.background = v; }))),
-      h("div", { class: "faint", style: { fontSize: "11px" } }, `${p.clips.length} clips · ${p.media.length} media · duration ${store.duration.toFixed(2)}s`),
+      this.textField("Tên", p.name, (v) => this.commit(() => { p.name = v; })),
+      this.fieldRow("Độ phân giải", res), this.fieldRow("Tốc độ khung hình", fps),
+      this.fieldRow("Nền", this.color(s.background, (v) => this.commit(() => { s.background = v; }))),
+      h("div", { class: "faint", style: { fontSize: "11px" } }, `${p.clips.length} clip · ${p.media.length} media · thời lượng ${store.duration.toFixed(2)}s`),
     ]));
-    for (const t of p.tracks.filter((t) => t.kind === "subtitle")) this.body.append(group(`Subtitle style — ${t.name}`, this.subStyle(t), true));
+    for (const t of p.tracks.filter((t) => t.kind === "subtitle")) this.body.append(group(`Kiểu phụ đề — ${t.name}`, this.subStyle(t), true));
   }
 
   private subStyle(t: Track): HTMLElement[] {
@@ -355,9 +355,9 @@ export class Inspector {
       const s = slider((st as any)[key] ?? def, min, max, step, (v) => { (st as any)[key] = v; store.changed("inspector"); }, () => store.begin());
       return this.fieldRow(label, h("div", { class: "row grow" }, s.range, s.num));
     };
-    return [this.fieldRow("Font", fonts), n("Size", "size", 12, 200, 1, 54), n("Weight", "weight", 100, 900, 100, 600), n("Position Y", "y", 0, 1, 0.01, 0.88),
-      this.fieldRow("Color", this.color(st.color ?? "#fff", (v) => this.commit(() => { st.color = v; }))),
-      this.fieldRow("Box", switchEl(!!st.background, (v) => this.commit(() => { st.background = v ? { color: "rgba(0,0,0,0.55)", padding: 14, radius: 10 } : undefined; })))];
+    return [this.fieldRow("Phông chữ", fonts), n("Cỡ chữ", "size", 12, 200, 1, 54), n("Độ đậm", "weight", 100, 900, 100, 600), n("Vị trí Y", "y", 0, 1, 0.01, 0.88),
+      this.fieldRow("Màu", this.color(st.color ?? "#fff", (v) => this.commit(() => { st.color = v; }))),
+      this.fieldRow("Hộp nền", switchEl(!!st.background, (v) => this.commit(() => { st.background = v ? { color: "rgba(0,0,0,0.55)", padding: 14, radius: 10 } : undefined; })))];
   }
 }
 
